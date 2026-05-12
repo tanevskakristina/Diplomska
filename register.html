@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="mk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Регистрација</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    <nav class="navbar">
+
+        <h2 class="logo">ПЛАНЕТ ФИТНЕС</h2>
+
+        <button id="registerBtn"
+            onclick="window.location.href='./index.html'">
+            Почетна
+        </button>
+
+    </nav>
+</header>
+
+<section class="register-page">
+
+    <div class="auth-box">
+
+        <h2> Регистрација</h2>
+
+        <input type="text" id="regName" placeholder="Име">
+
+        <input type="text" id="regSurname" placeholder="Презиме">
+
+        <input type="number" id="regAge" placeholder="Години">
+
+        <input type="text" id="regAddress" placeholder="Адреса">
+
+        <input type="email" id="regEmail" placeholder="Email">
+
+        <input type="password" id="regPassword" placeholder="Лозинка">
+
+        <div class="radio-group">
+            <label>Дали ви треба паркинг?</label>
+
+            <div class="radio-buttons">
+
+                <label>
+                    <input type="radio" name="parking" value="Да">
+                    Да
+                </label>
+
+                <label>
+                    <input type="radio" name="parking" value="Не">
+                    Не
+                </label>
+
+            </div>
+        </div>
+
+        <div class="radio-group">
+            <label>Најчесто кој период ќе доаѓате?</label>
+
+            <div class="radio-buttons">
+
+                <label>
+                    <input type="radio" name="gymTime" value="Сабајле">
+                    Сабајле
+                </label>
+
+                <label>
+                    <input type="radio" name="gymTime" value="Навечер">
+                    Навечер
+                </label>
+
+            </div>
+        </div>
+
+        <button onclick="registerUser()">Регистрирај се</button>
+
+        <p id="authMessage"></p>
+
+    </div>
+
+</section>
+
+<script src="script.js"></script>
+
+</body>
+</html>

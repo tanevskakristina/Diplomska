@@ -1,0 +1,150 @@
+
+<!DOCTYPE html>
+<html lang="mk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Shop</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <nav class="navbar">
+
+        <h2 class="logo">ПЛАНЕТ ФИТНЕС SHOP</h2>
+
+        <div>
+            <button id="registerBtn"
+            onclick="window.location.href='./index.html'">
+                Почетна
+            </button>
+        </div>
+
+    </nav>
+</header>
+
+<section class="shop-page">
+
+    <h1> Fitness Shop</h1>
+
+    <div class="shop-container">
+
+        <div class="product-card">
+            <img src="https://images.unsplash.com/photo-1579722821273-0f6c7d44362f?w=500">
+
+            <h3>Whey Protein</h3>
+
+            <p class="product-price">2500 ден</p>
+
+            <button onclick="orderProduct('Whey Protein')">
+                Нарачај
+            </button>
+        </div>
+
+        <div class="product-card">
+            <img src="https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=500">
+
+            <h3>Creatine</h3>
+
+            <p class="product-price">1200 ден</p>
+
+            <button onclick="orderProduct('Creatine')">
+                Нарачај
+            </button>
+        </div>
+
+        <div class="product-card">
+            <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=500">
+
+            <h3>Pre Workout</h3>
+
+            <p class="product-price">1500 ден</p>
+
+            <button onclick="orderProduct('Pre Workout')">
+                Нарачај
+            </button>
+        </div>
+
+    </div>
+
+</section>
+
+<div id="orderModal" class="modal">
+
+    <div class="modal-content">
+
+        <span class="close" onclick="closeOrder()">&times;</span>
+
+        <h2> Нарачка</h2>
+
+        <input type="text" id="customerName" placeholder="Име и презиме">
+
+        <input type="text" id="customerAddress" placeholder="Адреса за достава">
+
+        <input type="text" id="customerPhone" placeholder="Телефон">
+
+        <h3 id="selectedProduct"></h3>
+
+        <p>Плаќање при достава 🚚</p>
+
+        <button onclick="finishOrder()">
+            Потврди нарачка
+        </button>
+
+        <p id="orderMessage"></p>
+
+    </div>
+
+</div>
+
+<script>
+
+let currentProduct = "";
+
+function orderProduct(product){
+
+    currentProduct = product;
+
+    document.getElementById("orderModal").style.display = "flex";
+
+    document.getElementById("selectedProduct").innerText =
+        "Производ: " + product;
+}
+
+function closeOrder(){
+
+    document.getElementById("orderModal").style.display = "none";
+}
+
+function finishOrder(){
+
+    const name = document.getElementById("customerName").value;
+    const address = document.getElementById("customerAddress").value;
+    const phone = document.getElementById("customerPhone").value;
+
+    if(!name || !address || !phone){
+
+        document.getElementById("orderMessage").innerText =
+            "Пополнете ги сите полиња!";
+
+        return;
+    }
+
+    document.getElementById("orderMessage").innerText =
+        "Нарачката е успешно испратена!";
+
+    console.log({
+        product: currentProduct,
+        name,
+        address,
+        phone,
+        payment: "Плаќање при достава"
+    });
+}
+
+</script>
+
+</body>
+</html>
