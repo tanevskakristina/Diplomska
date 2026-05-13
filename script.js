@@ -248,3 +248,21 @@ function calculateBMI() {
     document.getElementById("bmiResult").innerText =
         "BMI: " + bmi.toFixed(2);
 }
+
+function openTrainer(name, type, bio, image) {
+
+    document.getElementById("trainerName").innerText = name;
+
+    document.getElementById("trainerType").innerText = type;
+
+    document.getElementById("trainerBio").innerText = bio;
+
+    document.getElementById("trainerImg").src = image;
+
+    document.getElementById("trainerModal").style.display = "flex";
+}
+
+function closeTrainer() {
+
+    document.getElementById("trainerModal").style.display = "none";
+}

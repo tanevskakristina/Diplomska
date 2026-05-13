@@ -104,49 +104,68 @@ button:hover{
     transform:scale(1.05);
 }
 
-/* ================= TRAINERS ================= */
-
 .trainers{
-    padding:80px 20px;
+    padding:100px 20px;
     text-align:center;
+    background:#0b0b0b;
 }
 
 .trainers h2{
-    font-size:40px;
+    font-size:42px;
     color:#ff3c00;
     margin-bottom:40px;
 }
 
+/* GRID FIX */
 .trainer-container{
-    display:flex;
-    justify-content:center;
-    gap:30px;
-    flex-wrap:wrap;
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap:25px;
+    max-width:1100px;
+    margin:auto;
 }
 
+/* CARD */
 .trainer-card{
     background:#1a1a1a;
-    padding:20px;
-    width:250px;
-    border-radius:10px;
-    transition:0.3s;
+    border-radius:15px;
+    overflow:hidden;
+    text-align:center;
+    box-shadow:0 10px 25px rgba(0,0,0,0.5);
+
+    /* IMPORTANT */
+    width:100%;
 }
 
-.trainer-card:hover{
-    transform:scale(1.05);
-}
-
+/* IMAGE FIX */
 .trainer-card img{
     width:100%;
-    border-radius:10px;
+    height:280px;
+    object-fit:cover;
+    display:block;
 }
 
+/* TEXT */
 .trainer-card h3{
-    margin-top:15px;
+    margin:15px 0 5px;
 }
 
 .trainer-card p{
     color:#ccc;
+    padding-bottom:15px;
+}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+    .trainer-container{
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media(max-width:600px){
+    .trainer-container{
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ================= BMI ================= */
@@ -1262,3 +1281,26 @@ onclick="window.location.href='shop.html'">
     background:#9333ea;
 }
 
+.trainer-card{
+    cursor:pointer;
+}
+
+.trainer-modal-content{
+    max-width:500px;
+    text-align:center;
+}
+
+.trainer-modal-content img{
+    width:100%;
+    border-radius:15px;
+    margin-bottom:15px;
+}
+
+.trainer-modal-content h2{
+    margin-bottom:5px;
+}
+
+.trainer-modal-content h4{
+    color:#888;
+    margin-bottom:15px;
+}
