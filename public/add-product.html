@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="mk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product - Fitness Shop</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <nav class="navbar">
+        <h2 class="logo">ПЛАНЕТ ФИТНЕС SHOP</h2>
+        <div>
+            <button onclick="window.location.href='./shop.html'">Назад кон продавница</button>
+        </div>
+    </nav>
+</header>
+
+<section class="add-product-page">
+    <div id="loginSection">
+        <h1>Пријава за администратор</h1>
+        <form id="adminLoginForm">
+            <div class="form-group">
+                <label for="adminEmail">Email</label>
+                <input type="email" id="adminEmail" placeholder="Email" required>
+            </div>
+            <div class="form-group">
+                <label for="adminPassword">Лозинка</label>
+                <input type="password" id="adminPassword" placeholder="Лозинка" required>
+            </div>
+            <button type="submit">Пријава</button>
+        </form>
+        <p id="loginMessage"></p>
+    </div>
+
+    <div id="productSection" style="display:none;">
+        <h1>Додади нов производ</h1>
+        <form id="addProductForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="productName">Име на производ</label>
+                <input type="text" id="productName" name="name" placeholder="Име на производ" required>
+            </div>
+            <div class="form-group">
+                <label for="productPrice">Цена (ден)</label>
+                <input type="number" id="productPrice" name="price" placeholder="Цена (ден)" required>
+            </div>
+            <div class="form-group">
+                <label for="productImage">Слика на производ</label>
+                <input type="file" id="productImage" name="image" accept="image/*" required>
+            </div>
+            <button type="submit">Додади производ</button>
+        </form>
+        <p id="message"></p>
+    </div>
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const token = localStorage.getItem("adminToken");
+    
+    if (token) {
+        document.getElementById("loginSection").style.display = "none";
+        document.getElementById("productSection").style.display = "block";
+    } else {
+        document.getElementById("loginSection").style.display = "block";
+        document.getElementById("productSection").style.display = "none";
+    }
+});
+
+document.getElementById("adminLoginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("adminEmail").value;
+    const password = document.getElementById("adminPassword").value;
+
+    try {
+        const response = await fetch("/api/users/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.user.role === "admin") {
+            localStorage.setItem("adminToken", data.token);
+            document.getElementById("loginSection").style.display = "none";
+            document.getElementById("productSection").style.display = "block";
+            document.getElementById("loginMessage").innerHTML = "";
+        } else if (response.ok && data.user.role !== "admin") {
+            document.getElementById("loginMessage").innerHTML = "Само администраторите можат да додаваат производи!";
+        } else {
+            document.getElementById("loginMessage").innerHTML = data.message || "Грешка при пријава";
+        }
+    } catch (error) {
+        document.getElementById("loginMessage").innerHTML = "Грешка при пријава.";
+    }
+});
+
+document.getElementById("addProductForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append("name", document.getElementById("productName").value);
+    formData.append("price", document.getElementById("productPrice").value);
+    formData.append("image", document.getElementById("productImage").files[0]);
+
+    const token = localStorage.getItem("adminToken");
+
+    try {
+        const response = await fetch("/api/products", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            },
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            document.getElementById("message").innerHTML = "Производот е успешно додаден!";
+            document.getElementById("addProductForm").reset();
+        } else {
+            document.getElementById("message").innerHTML = data.message || "Грешка при додавање";
+        }
+    } catch (error) {
+        document.getElementById("message").innerHTML = "Грешка при додавање на производ.";
+    }
+});
+</script>
+
+</body>
+</html>

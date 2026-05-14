@@ -40,17 +40,32 @@
 
     <button id="loginBtn" onclick="openLogin()">Login</button>
 
-<button id="registerBtn" onclick="window.location.href='register.html'">
-    Register
-</button>
+    <button id="registerBtn" onclick="window.location.href='./register.html'">
+                Register
+            </button>        
+   
     <button id="logoutBtn" onclick="logoutUser()" style="display:none;">Logout</button>
-
 </div>
     </nav>
-
- 
-
 </header>
+
+<script>
+function updateRegisterButton() {
+    const token = localStorage.getItem("token");
+    const adminToken = localStorage.getItem("adminToken");
+    const registerBtn = document.getElementById("registerBtn");
+    
+    if (token || adminToken) {
+        registerBtn.style.display = "none";
+    } else {
+        registerBtn.style.display = "block";
+    }
+}
+
+window.onload = () => {
+    updateRegisterButton();
+};
+</script>
 
 
 
@@ -156,8 +171,10 @@
     <div class="bmi-box">
         <input type="number" id="height" placeholder="Висина (cm)">
         <input type="number" id="weight" placeholder="Тежина (kg)">
+        <br/><br/>
         <button onclick="calculateBMI()">Пресметај</button>
         <h3 id="bmiResult"></h3>
+        <p id="bmiCategory"></p>
     </div>
 </section>
 

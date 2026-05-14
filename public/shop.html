@@ -16,9 +16,14 @@
         <h2 class="logo">ПЛАНЕТ ФИТНЕС SHOP</h2>
 
         <div>
-            <button id="registerBtn"
+            <button 
             onclick="window.location.href='./index.html'">
                 Почетна
+            </button>
+           
+        
+            <button id="addProductBtn" onclick="window.location.href='./add-product.html'">
+                Додади производ
             </button>
         </div>
 
@@ -29,44 +34,8 @@
 
     <h1> Fitness Shop</h1>
 
-    <div class="shop-container">
-
-        <div class="product-card">
-            <img src="https://images.unsplash.com/photo-1579722821273-0f6c7d44362f?w=500">
-
-            <h3>Whey Protein</h3>
-
-            <p class="product-price">2500 ден</p>
-
-            <button onclick="orderProduct('Whey Protein')">
-                Нарачај
-            </button>
-        </div>
-
-        <div class="product-card">
-            <img src="https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=500">
-
-            <h3>Creatine</h3>
-
-            <p class="product-price">1200 ден</p>
-
-            <button onclick="orderProduct('Creatine')">
-                Нарачај
-            </button>
-        </div>
-
-        <div class="product-card">
-            <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=500">
-
-            <h3>Pre Workout</h3>
-
-            <p class="product-price">1500 ден</p>
-
-            <button onclick="orderProduct('Pre Workout')">
-                Нарачај
-            </button>
-        </div>
-
+    <div class="shop-container" id="shopContainer">
+        <!-- Products will be loaded here -->
     </div>
 
 </section>
@@ -103,37 +72,53 @@
 
 let currentProduct = "";
 
+async function loadProducts() {
+    try {
+        const response = await fetch("/api/products");
+        const products = await response.json();
+
+        const container = document.getElementById("shopContainer");
+        container.innerHTML = "";
+
+        products.forEach(product => {
+            const productCard = document.createElement("div");
+            productCard.className = "product-card";
+
+            productCard.innerHTML = `
+                <img src="${product.image}" alt="${product.name}">
+                <h3>${product.name}</h3>
+                <p class="product-price">${product.price} ден</p>
+                <button onclick="orderProduct('${product.name}')">Нарачај</button>
+            `;
+
+            container.appendChild(productCard);
+        });
+    } catch (error) {
+        console.error("Error loading products:", error);
+    }
+}
+
 function orderProduct(product){
-
     currentProduct = product;
-
     document.getElementById("orderModal").style.display = "flex";
-
-    document.getElementById("selectedProduct").innerText =
-        "Производ: " + product;
+    document.getElementById("selectedProduct").innerText = "Производ: " + product;
 }
 
 function closeOrder(){
-
     document.getElementById("orderModal").style.display = "none";
 }
 
 function finishOrder(){
-
     const name = document.getElementById("customerName").value;
     const address = document.getElementById("customerAddress").value;
     const phone = document.getElementById("customerPhone").value;
 
     if(!name || !address || !phone){
-
-        document.getElementById("orderMessage").innerText =
-            "Пополнете ги сите полиња!";
-
+        document.getElementById("orderMessage").innerText = "Пополнете ги сите полиња!";
         return;
     }
 
-    document.getElementById("orderMessage").innerText =
-        "Нарачката е успешно испратена!";
+    document.getElementById("orderMessage").innerText = "Нарачката е успешно испратена!";
 
     console.log({
         product: currentProduct,
@@ -144,6 +129,24 @@ function finishOrder(){
     });
 }
 
+
+function updateProductButton() {
+    const token = localStorage.getItem("token");
+    const addProductBtn = document.getElementById("addProductBtn");
+
+    if (token) {
+        addProductBtn.style.display = "none";
+    } else {
+        addProductBtn.style.display = "block";
+    }
+}
+
+// Load products when page loads
+window.onload = function() {
+    loadProducts();
+    updateProductButton();
+    
+};
 </script>
 
 </body>

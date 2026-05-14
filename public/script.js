@@ -194,20 +194,45 @@ function loginUser() {
     })
     .then(response => response.json())
     .then(data => {
+
         if (data.token) {
-            // Store token and user info
-            localStorage.setItem("token", data.token);
+
+            // REMOVE old tokens first
+            localStorage.removeItem("token");
+            localStorage.removeItem("adminToken");
+
+            // Save logged user
             localStorage.setItem("loggedUser", JSON.stringify(data.user));
-            document.getElementById("loginMessage").innerText = "Успешен login!";
+
+            // ADMIN LOGIN
+            if (data.user && data.user.role === "admin") {
+
+                localStorage.setItem("adminToken", data.token);
+
+            } else {
+
+                // NORMAL USER LOGIN
+                localStorage.setItem("token", data.token);
+            }
+
+            document.getElementById("loginMessage").innerText =
+                "Успешен login!";
+
             closeLogin();
             updateUI();
+
         } else {
-            document.getElementById("loginMessage").innerText = data.message;
+
+            document.getElementById("loginMessage").innerText =
+                data.message;
         }
     })
     .catch(error => {
+
         console.error('Error:', error);
-        document.getElementById("loginMessage").innerText = "Грешка при login!";
+
+        document.getElementById("loginMessage").innerText =
+            "Грешка при login!";
     });
 }
 
@@ -223,25 +248,34 @@ function loginUser() {
 function logoutUser() {
     localStorage.removeItem("loggedUser");
     localStorage.removeItem("token");
+    localStorage.removeItem("adminToken");
     updateUI();
 }
 
 function updateUI() {
 
     let user = JSON.parse(localStorage.getItem("loggedUser"));
+    let adminToken = localStorage.getItem("adminToken");
 
     let welcome = document.getElementById("welcomeUser");
     let loginBtn = document.getElementById("loginBtn");
     let logoutBtn = document.getElementById("logoutBtn");
+    let registerBtn = document.getElementById("registerBtn");
 
-    if (user) {
-        welcome.innerText = "Добредојде, " + user.name;
+    if (user || adminToken) {
+        if (user) {
+            welcome.innerText = "Добредојде, " + user.name;
+        } else {
+            welcome.innerText = "Добредојде админ";
+        }
         loginBtn.style.display = "none";
         logoutBtn.style.display = "inline-block";
+        if (registerBtn) registerBtn.style.display = "none";
     } else {
         welcome.innerText = "";
         loginBtn.style.display = "inline-block";
         logoutBtn.style.display = "none";
+        if (registerBtn) registerBtn.style.display = "block";
     }
 }
 
@@ -257,9 +291,20 @@ function calculateBMI() {
     h = h / 100;
 
     let bmi = w / (h * h);
-
+   { 
     document.getElementById("bmiResult").innerText =
         "BMI: " + bmi.toFixed(2);
+
+    if (bmi < 18.5) {
+        document.getElementById("bmiCategory").innerText = "Подпросечна тежина";
+    } else if (bmi < 25) {
+        document.getElementById("bmiCategory").innerText = "Нормална тежина";
+    } else if (bmi < 30) {
+        document.getElementById("bmiCategory").innerText = "Надпросечна тежина";
+    } else {
+        document.getElementById("bmiCategory").innerText = "Обесност";
+    }
+}
 }
 
 function openTrainer(name, type, bio, image) {

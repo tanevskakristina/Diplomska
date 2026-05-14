@@ -26,7 +26,8 @@ router.post("/register", async (req, res) => {
             email,
             password: hashedPassword,
             parking,
-            gymTime
+            gymTime,
+            role: 'user'
         });
 
         await user.save();
@@ -64,7 +65,8 @@ router.post("/login", async (req, res) => {
             user: {
                 id: user._id,
                 name: user.name,
-                email: user.email
+                email: user.email,
+                role: user.role
             }
         });
     } catch (error) {

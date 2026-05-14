@@ -8,7 +8,8 @@ const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     parking: { type: String, enum: ['Да', 'Не'], required: true },
-    gymTime: { type: String, enum: ['Сабајле', 'Навечер'], required: true }
+    gymTime: { type: String, enum: ['Сабајле', 'Навечер'], required: true },
+    role: { type: String, enum: ['user', 'admin'], default: 'user' }
 });
 
 module.exports = mongoose.model("User", userSchema);
