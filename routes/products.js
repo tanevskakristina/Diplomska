@@ -31,12 +31,13 @@ router.get("/", async (req, res) => {
 // POST add new product
 router.post("/", adminAuth, upload.single("image"), async (req, res) => {
     try {
-        const { name, price } = req.body;
+        const { name, price, category } = req.body;
         const image = req.file ? `/uploads/${req.file.filename}` : "";
 
         const product = new Product({
             name,
             price: parseInt(price),
+            category,
             image
         });
 

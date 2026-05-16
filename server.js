@@ -49,11 +49,6 @@ mongoose.connect(process.env.MONGO_URI)
     const Product = require("./models/Product");
     const count = await Product.countDocuments();
     if (count === 0) {
-        const initialProducts = [
-            { name: "Whey Protein", price: 2500, image: "https://images.unsplash.com/photo-1579722821273-0f6c7d44362f?w=500" },
-            { name: "Creatine", price: 1200, image: "https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=500" },
-            { name: "Pre Workout", price: 1500, image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=500" }
-        ];
         await Product.insertMany(initialProducts);
         console.log("Initial products added");
     }

@@ -36,6 +36,10 @@
 
         <div class="auth-area">
 
+    <div id="userAvatar" class="user-avatar" style="display:none;">
+        <span id="avatarInitials"></span>
+    </div>
+
     <span id="welcomeUser"></span>
 
     <button id="loginBtn" onclick="openLogin()">Login</button>
@@ -184,19 +188,25 @@ window.onload = () => {
 
     <div class="pricing-container">
 
-        <div class="price-card">
-            <h3>Basic</h3>
-            <p class="price">1000 ден</p>
+        <div class="price-card vip">
+            <button class="card-click" onclick="openMembership('VIP')" aria-label="Open VIP benefits"></button>
+            <h3>VIP</h3>
+            <p class="price">2500 ден</p>
+            <p class="card-note">Кликни за да ги видиш придобивките</p>
         </div>
 
         <div class="price-card premium">
+            <button class="card-click" onclick="openMembership('Premium')" aria-label="Open Premium benefits"></button>
             <h3>Premium</h3>
             <p class="price">1500 ден</p>
+            <p class="card-note">Кликни за да ги видиш придобивките</p>
         </div>
 
-        <div class="price-card">
-            <h3>VIP</h3>
-            <p class="price">2500 ден</p>
+        <div class="price-card basic">
+            <button class="card-click" onclick="openMembership('Basic')" aria-label="Open Basic benefits"></button>
+            <h3>Basic</h3>
+            <p class="price">1000 ден</p>
+            <p class="card-note">Кликни за да ги видиш придобивките</p>
         </div>
 
     </div>
@@ -284,5 +294,29 @@ window.onload = () => {
     </div>
 
 </div>
+
+<!-- MEMBERSHIP MODAL -->
+<div id="membershipModal" class="modal">
+    <div class="modal-content membership-modal-content">
+        <span class="close" onclick="closeMembership()">&times;</span>
+        <h2 id="membershipTitle"></h2>
+        <p class="membership-price" id="membershipPrice"></p>
+        <ul id="membershipBenefits"></ul>
+    </div>
+</div>
+
+<!-- PROFILE PICTURE MODAL -->
+<div id="profilePictureModal" class="modal">
+    <div class="modal-content profile-modal-content">
+        <span class="close" onclick="closeProfilePicture()">&times;</span>
+        <h2>Промени твоја слика за профил</h2>
+        <div id="imagePreview" class="image-preview">
+            <p>Твоја слика</p>
+        </div>
+        <input type="file" id="profileImageInput" accept="image/*">
+        <button onclick="uploadProfilePicture()">Зачувај слика</button>
+    </div>
+</div>
+
 </body>
 </html>

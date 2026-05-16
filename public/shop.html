@@ -15,13 +15,10 @@
 
         <h2 class="logo">ПЛАНЕТ ФИТНЕС SHOP</h2>
 
-        <div>
-            <button 
-            onclick="window.location.href='./index.html'">
+        <div class="nav-buttons">
+            <button onclick="window.location.href='./index.html'">
                 Почетна
             </button>
-           
-        
             <button id="addProductBtn" onclick="window.location.href='./add-product.html'">
                 Додади производ
             </button>
@@ -33,6 +30,18 @@
 <section class="shop-page">
 
     <h1> Fitness Shop</h1>
+
+    <div class="filter-group">
+        <label for="categoryFilter">Избери категорија:</label>
+        <select id="categoryFilter">
+            <option value="all" selected>Сите категории</option>
+            <option value="Креатин">Креатин</option>
+            <option value="Протеин">Протеин</option>
+            <option value="Согорувач на масти">Согорувач на масти</option>
+            <option value="Гејнер">Гејнер</option>
+            <option value="Аминокиселини">Аминокиселини</option>
+        </select>
+    </div>
 
     <div class="shop-container" id="shopContainer">
         <!-- Products will be loaded here -->
@@ -71,31 +80,45 @@
 <script>
 
 let currentProduct = "";
+let allProducts = [];
 
 async function loadProducts() {
     try {
         const response = await fetch("/api/products");
-        const products = await response.json();
-
-        const container = document.getElementById("shopContainer");
-        container.innerHTML = "";
-
-        products.forEach(product => {
-            const productCard = document.createElement("div");
-            productCard.className = "product-card";
-
-            productCard.innerHTML = `
-                <img src="${product.image}" alt="${product.name}">
-                <h3>${product.name}</h3>
-                <p class="product-price">${product.price} ден</p>
-                <button onclick="orderProduct('${product.name}')">Нарачај</button>
-            `;
-
-            container.appendChild(productCard);
-        });
+        allProducts = await response.json();
+        renderProducts();
     } catch (error) {
         console.error("Error loading products:", error);
     }
+}
+
+function renderProducts(filterCategory = "all") {
+    const container = document.getElementById("shopContainer");
+    container.innerHTML = "";
+
+    const filtered = filterCategory === "all"
+        ? allProducts
+        : allProducts.filter(product => product.category === filterCategory);
+
+    if (filtered.length === 0) {
+        container.innerHTML = `<p class="empty-message">Нема производи во оваа категорија.</p>`;
+        return;
+    }
+
+    filtered.forEach(product => {
+        const productCard = document.createElement("div");
+        productCard.className = "product-card";
+
+        productCard.innerHTML = `
+            <img src="${product.image}" alt="${product.name}">
+            <h3>${product.name}</h3>
+            <p class="product-category">Категорија: ${product.category}</p>
+            <p class="product-price">${product.price} ден</p>
+            <button onclick="orderProduct('${product.name}')">Нарачај</button>
+        `;
+
+        container.appendChild(productCard);
+    });
 }
 
 function orderProduct(product){
@@ -129,7 +152,6 @@ function finishOrder(){
     });
 }
 
-
 function updateProductButton() {
     const token = localStorage.getItem("token");
     const addProductBtn = document.getElementById("addProductBtn");
@@ -141,11 +163,12 @@ function updateProductButton() {
     }
 }
 
-// Load products when page loads
 window.onload = function() {
     loadProducts();
     updateProductButton();
-    
+    document.getElementById("categoryFilter").addEventListener("change", (event) => {
+        renderProducts(event.target.value);
+    });
 };
 </script>
 

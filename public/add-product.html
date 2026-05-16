@@ -46,6 +46,17 @@
                 <input type="number" id="productPrice" name="price" placeholder="Цена (ден)" required>
             </div>
             <div class="form-group">
+                <label for="productCategory">Категориja</label>
+                <select id="productCategory" name="category" required>
+                    <option value="" disabled selected>Избери категорија</option>
+                    <option value="Креатин">Креатин</option>
+                    <option value="Протеин">Протеин</option>
+                    <option value="Согорувач на масти">Согорувач на масти</option>
+                    <option value="Гејнер">Гејнер</option>
+                    <option value="Аминокиселини">Аминокиселини</option>
+                </select>
+            </div>
+            <div class="form-group">
                 <label for="productImage">Слика на производ</label>
                 <input type="file" id="productImage" name="image" accept="image/*" required>
             </div>
@@ -106,6 +117,7 @@ document.getElementById("addProductForm").addEventListener("submit", async (e) =
     const formData = new FormData();
     formData.append("name", document.getElementById("productName").value);
     formData.append("price", document.getElementById("productPrice").value);
+    formData.append("category", document.getElementById("productCategory").value);
     formData.append("image", document.getElementById("productImage").files[0]);
 
     const token = localStorage.getItem("adminToken");

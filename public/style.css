@@ -54,6 +54,16 @@ html{
     color:#ff3c00;
 }
 
+.nav-buttons{
+    display:flex;
+    gap:15px;
+    align-items:center;
+}
+
+.nav-buttons button{
+    min-width:140px;
+}
+
 /* ================= HERO ================= */
 
 .hero{
@@ -231,8 +241,30 @@ button:hover{
     transition:0.3s;
 }
 
+.price-card{ position:relative; }
+
+.card-click{
+    position:absolute;
+    inset:0;
+    background:transparent;
+    border:none;
+    padding:0;
+    margin:0;
+    cursor:pointer;
+    z-index:10;
+}
+
+.price-card > h3,
+.price-card > p{
+    pointer-events:none;
+}
+
 .price-card:hover{
     transform:scale(1.05);
+}
+
+.price-card{
+    cursor:pointer;
 }
 
 .price-card h3{
@@ -259,11 +291,104 @@ button:hover{
     width:100%;
 }
 
+.price-card .card-note{
+    color:#ffb5a0;
+    margin-top:12px;
+    font-size:14px;
+}
+
+.membership-modal-content{
+    max-width:520px;
+    text-align:left;
+}
+
+.membership-modal-content h2{
+    margin-bottom:12px;
+    color:#ff4c00;
+}
+
+.membership-modal-content .membership-price{
+    font-size:22px;
+    color:#ff8c00;
+    margin-bottom:18px;
+}
+
+.membership-modal-content ul{
+    list-style:disc inside;
+    margin:0 auto 0 auto;
+    max-width:380px;
+    color:#ddd;
+}
+
+.membership-modal-content ul li{
+    margin:10px 0;
+}
+
 .premium{
     border:2px solid #ff3c00;
 }
 
 /* ================= LOCATION ================= */
+
+/* ================= REGISTER PAGE (REDDENED) ================= */
+.register-page{
+    padding:80px 20px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:60vh;
+    background:linear-gradient(180deg, rgba(40,6,6,0.6), rgba(10,0,0,0.9));
+}
+
+.auth-box{
+    background:linear-gradient(180deg, #2b0707, #120303);
+    padding:30px 36px;
+    border-radius:12px;
+    box-shadow:0 10px 30px rgba(255,60,0,0.12);
+    width:360px;
+    text-align:center;
+    color:#fff;
+    border:1px solid rgba(255,76,0,0.12);
+}
+
+.auth-box h2{
+    color:#ff6b4a;
+    margin-bottom:16px;
+}
+
+.auth-box input{
+    width:100%;
+    padding:12px 14px;
+    margin:8px 0;
+    border-radius:8px;
+    border:1px solid rgba(255,76,0,0.18);
+    background:#230606;
+    color:#fff;
+}
+
+.auth-box .radio-group label{
+    color:#ffd6c8;
+}
+
+.auth-box button{
+    background:linear-gradient(90deg,#ff4c00,#ff1f00);
+    border:none;
+    color:white;
+    padding:12px 18px;
+    border-radius:8px;
+    cursor:pointer;
+    margin-top:12px;
+}
+
+.auth-box button:hover{
+    transform:translateY(-2px);
+}
+
+.auth-box #authMessage{
+    margin-top:12px;
+    color:#ffd6c8;
+}
+
 
 .location{
     padding:80px 20px;
@@ -767,6 +892,25 @@ section{
     transform: translateY(0);
 }
 
+/* Animation variants */
+.hidden.animate-fade{ opacity:0; transform: none; }
+.show.animate-fade{ opacity:1; transform: none; transition: opacity 0.6s ease, transform 0.6s ease; }
+
+.hidden.animate-slide-left{ opacity:0; transform: translateX(-30px); }
+.show.animate-slide-left{ opacity:1; transform: translateX(0); transition: transform 0.6s ease, opacity 0.6s ease; }
+
+.hidden.animate-slide-right{ opacity:0; transform: translateX(30px); }
+.show.animate-slide-right{ opacity:1; transform: translateX(0); transition: transform 0.6s ease, opacity 0.6s ease; }
+
+.hidden.animate-zoom{ opacity:0; transform: scale(0.92); }
+.show.animate-zoom{ opacity:1; transform: scale(1); transition: transform 0.5s cubic-bezier(.2,.8,.2,1), opacity 0.5s ease; }
+
+.hidden.animate-zoom-slow{ opacity:0; transform: scale(0.95) translateY(20px); }
+.show.animate-zoom-slow{ opacity:1; transform: scale(1) translateY(0); transition: transform 0.7s ease, opacity 0.7s ease; }
+
+/* utility to ensure transition-delay applies */
+.hidden, .show{ transition-delay: 0s; }
+
 button{
     box-shadow: 0 0 10px rgba(255,60,0,0.3);
 }
@@ -836,6 +980,90 @@ html{
 .auth-area span{
     color:#ff3c00;
     font-weight:bold;
+}
+
+.user-avatar{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    background:linear-gradient(135deg, #ff3c00, #ff8c00);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    color:white;
+    font-size:16px;
+    box-shadow:0 0 10px rgba(255,60,0,0.4);
+    cursor:pointer;
+    transition:0.3s;
+    overflow:hidden;
+    position:relative;
+}
+
+.user-avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    border-radius:50%;
+}
+
+.user-avatar:hover{
+    transform:scale(1.1);
+    box-shadow:0 0 20px rgba(255,60,0,0.6);
+}
+
+.profile-modal-content{
+    max-width:400px;
+    text-align:center;
+}
+
+.image-preview{
+    width:150px;
+    height:150px;
+    border-radius:50%;
+    background:linear-gradient(135deg, #ff3c00, #ff8c00);
+    margin:20px auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    border:3px solid rgba(255,60,0,0.3);
+}
+
+.image-preview img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    border-radius:50%;
+}
+
+.image-preview p{
+    color:white;
+    font-size:14px;
+}
+
+#profileImageInput{
+    display:block;
+    margin:15px auto;
+    padding:10px;
+    border:1px solid rgba(255,60,0,0.3);
+    border-radius:5px;
+    background:#2a2a2a;
+    color:white;
+    width:280px;
+}
+
+#profileImageInput::file-selector-button{
+    background:#ff3c00;
+    color:white;
+    border:none;
+    padding:8px 15px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+#profileImageInput::file-selector-button:hover{
+    background:#ff8c00;
 }
 
 #loginBtn, #logoutBtn{

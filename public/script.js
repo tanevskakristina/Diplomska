@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     updateUI();
     initMembers();
+    initScrollAnimations();
 
     // ================= TOP BUTTON =================
     const topBtn = document.getElementById("topBtn");
@@ -22,8 +23,36 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // Close modals on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeMembership();
+            closeTrainer();
+            closeLogin();
+            closeProfilePicture();
+        }
+    });
+
     
 });
+
+// Attach membership card click handlers after DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    const cards = document.querySelectorAll('.price-card');
+    cards.forEach(card => {
+        card.addEventListener('click', (e) => {
+            console.log('price-card clicked:', card.className);
+            // prefer explicit class names: vip, premium, basic
+            let type = 'Basic';
+            if (card.classList.contains('vip')) type = 'VIP';
+            else if (card.classList.contains('premium')) type = 'Premium';
+            openMembership(type);
+        });
+    });
+});
+
+// expose for manual testing from console
+window.openMembership = openMembership;
 
 
 // ================= MEMBERS =================
@@ -236,19 +265,11 @@ function loginUser() {
     });
 }
 
-    message.innerText = "Добредојде " + user.name;
-
-    updateUI();
-
-    setTimeout(() => {
-        closeLogin();
-    }, 1000);
-
-
 function logoutUser() {
     localStorage.removeItem("loggedUser");
     localStorage.removeItem("token");
     localStorage.removeItem("adminToken");
+    localStorage.removeItem("userProfilePicture");
     updateUI();
 }
 
@@ -261,6 +282,7 @@ function updateUI() {
     let loginBtn = document.getElementById("loginBtn");
     let logoutBtn = document.getElementById("logoutBtn");
     let registerBtn = document.getElementById("registerBtn");
+    let userAvatar = document.getElementById("userAvatar");
 
     if (user || adminToken) {
         if (user) {
@@ -271,11 +293,15 @@ function updateUI() {
         loginBtn.style.display = "none";
         logoutBtn.style.display = "inline-block";
         if (registerBtn) registerBtn.style.display = "none";
+        if (userAvatar) userAvatar.style.display = "flex";
+        // Display avatar with picture or initials
+        displayUserAvatar();
     } else {
         welcome.innerText = "";
         loginBtn.style.display = "inline-block";
         logoutBtn.style.display = "none";
         if (registerBtn) registerBtn.style.display = "block";
+        if (userAvatar) userAvatar.style.display = "none";
     }
 }
 
@@ -321,28 +347,231 @@ function openTrainer(name, type, bio, image) {
 }
 
 function closeTrainer() {
-
-    document.getElementById("trainerModal").style.display = "none";
+    const modal = document.getElementById("trainerModal");
+    if (modal) modal.style.display = "none";
 }
 
-document.getElementById("submitJoin").addEventListener("click", async () => {
+// ================= MEMBERSHIP MODAL =================
+function openMembership(type) {
+    const titleEl = document.getElementById('membershipTitle');
+    const priceEl = document.getElementById('membershipPrice');
+    const benefitsEl = document.getElementById('membershipBenefits');
 
-    const name = document.getElementById("name").value;
-    const email = document.getElementById("email").value;
+    let data = { price: '', benefits: [] };
 
-    const response = await fetch("/api/users/register", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            name,
-            email
-        })
+    if (type === 'Basic') {
+        data.price = '1000 ден';
+        data.benefits = [
+            'Неограничен пристап до фитнес зоната',
+            'Современа кардио и strength опрема',
+            'Комфорни соблекувални и туш кабини',
+            'Почетен фитнес план според твоите цели',
+            'Енергија, мотивација и атмосфера на високо ниво'
+        ];
+    } else if (type === 'Premium') {
+        data.price = '1500 ден';
+        data.benefits = [
+            'Сè од BASIC пакетот',
+            '24/7 пристап без ограничување',
+            'Групни часови: HIIT, Functional, Yoga, Pilates',
+            'Персонализирана програма за тренинг и исхрана',
+            'Приоритетни резервации за часови',
+            'Exclusive discounts на суплементи и fitness bar',
+            'Следење на прогрес и body analysis'
+        ];
+    } else if (type === 'VIP') {
+        data.price = '2500 ден';
+        data.benefits = [
+            'Целосно PREMIUM искуство',
+            'Dedicated personal trainer',
+            'VIP locker & private зона',
+            'Priority access до цела опрема и студија',
+            'Бесплатни premium protein shakes & coffee',
+            'Месечни body composition анализи',
+            'Private coaching & lifestyle support',
+            'Бесплатен паркинг',
+            'Exclusive VIP events и специјални привилегии'
+        ];
+    }
+
+    if (titleEl) {
+        const titleMap = { Basic: 'BASIC MEMBERSHIP', Premium: 'PREMIUM MEMBERSHIP', VIP: 'VIP MEMBERSHIP' };
+        titleEl.innerText = titleMap[type] || type;
+    }
+
+    if (priceEl) priceEl.innerText = data.price;
+    if (benefitsEl) benefitsEl.innerHTML = data.benefits.map(b => `<li>${b}</li>`).join('');
+
+    const modal = document.getElementById('membershipModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeMembership() {
+    const modal = document.getElementById('membershipModal');
+    if (modal) modal.style.display = 'none';
+}
+
+const submitJoinEl = document.getElementById("submitJoin");
+if (submitJoinEl) {
+    submitJoinEl.addEventListener("click", async () => {
+
+        const name = document.getElementById("name").value;
+        const email = document.getElementById("email").value;
+
+        const response = await fetch("/api/users/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name,
+                email
+            })
+        });
+
+        const data = await response.json();
+
+        const msgEl = document.getElementById("message");
+        if (msgEl) msgEl.innerText = data.message;
+    });
+}
+
+// ================= PROFILE PICTURE MODAL =================
+function openProfilePicture() {
+    const modal = document.getElementById('profilePictureModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeProfilePicture() {
+    const modal = document.getElementById('profilePictureModal');
+    if (modal) modal.style.display = 'none';
+    // Reset file input
+    const fileInput = document.getElementById('profileImageInput');
+    if (fileInput) fileInput.value = '';
+}
+
+// Handle file selection and preview
+document.addEventListener('DOMContentLoaded', () => {
+    const fileInput = document.getElementById('profileImageInput');
+    const preview = document.getElementById('imagePreview');
+    
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    preview.innerHTML = `<img src="${event.target.result}" alt="Preview">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+
+// Upload and save profile picture
+function uploadProfilePicture() {
+    const fileInput = document.getElementById('profileImageInput');
+    if (!fileInput || !fileInput.files[0]) {
+        alert('Одбери слика!');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const imageData = e.target.result;
+        
+        // Get current user
+        let user = JSON.parse(localStorage.getItem('loggedUser'));
+        if (user) {
+            // Save image to localStorage
+            localStorage.setItem('userProfilePicture', imageData);
+            
+            // Update avatar display
+            displayUserAvatar();
+            
+            // Close modal
+            closeProfilePicture();
+            
+            alert('Твоја слика е зачувана!');
+        }
+    };
+    reader.readAsDataURL(fileInput.files[0]);
+}
+
+// Display user avatar with profile picture or initials
+function displayUserAvatar() {
+    const userAvatar = document.getElementById('userAvatar');
+    const avatarInitials = document.getElementById('avatarInitials');
+    const profilePicture = localStorage.getItem('userProfilePicture');
+    
+    if (userAvatar) {
+        if (profilePicture) {
+            userAvatar.innerHTML = `<img src="${profilePicture}" alt="Profile">`;
+        } else {
+            let user = JSON.parse(localStorage.getItem('loggedUser'));
+            if (user) {
+                const names = user.name.split(" ");
+                const initials = names.map(n => n[0]).join("").toUpperCase().slice(0, 2);
+                userAvatar.innerHTML = `<span id="avatarInitials">${initials}</span>`;
+            } else {
+                userAvatar.innerHTML = '<span id="avatarInitials">A</span>';
+            }
+        }
+    }
+}
+
+// Add click handler to avatar to open profile picture modal
+document.addEventListener('DOMContentLoaded', () => {
+    const userAvatar = document.getElementById('userAvatar');
+    if (userAvatar) {
+        userAvatar.addEventListener('click', openProfilePicture);
+    }
+});
+
+// ================= SCROLL ANIMATIONS =================
+function initScrollAnimations() {
+    const selector = 'section, .trainer-card, .price-card, .testimonial-card, .product-card, .stat, .hero-content';
+    const targets = Array.from(document.querySelectorAll(selector));
+
+    function getAnimationFor(el) {
+        if (el.classList.contains('trainer-card')) return 'animate-slide-left';
+        if (el.classList.contains('price-card')) return 'animate-zoom';
+        if (el.classList.contains('testimonial-card')) return 'animate-slide-right';
+        if (el.classList.contains('product-card')) return 'animate-zoom';
+        if (el.classList.contains('stat')) return 'animate-fade';
+        if (el.classList.contains('hero-content')) return 'animate-zoom-slow';
+        return 'animate-fade';
+    }
+
+    // Add hidden + animation class initially and prepare stagger delay
+    targets.forEach((el, i) => {
+        const anim = getAnimationFor(el);
+        el.classList.add(anim);
+        if (!el.classList.contains('hidden') && !el.classList.contains('show')) {
+            el.classList.add('hidden');
+        }
+        // stagger delay per element
+        el.dataset.animDelay = (i * 0.06).toFixed(2);
     });
 
-    const data = await response.json();
+    const observerOptions = {
+        root: null,
+        rootMargin: '0px 0px -80px 0px',
+        threshold: 0.12
+    };
 
-    document.getElementById("message").innerText =
-        data.message;
-});
+    const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const delay = entry.target.dataset.animDelay || 0;
+                entry.target.style.transitionDelay = `${delay}s`;
+                entry.target.classList.add('show');
+                entry.target.classList.remove('hidden');
+                obs.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    targets.forEach(t => observer.observe(t));
+}
