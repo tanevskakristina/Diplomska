@@ -7,6 +7,7 @@
     <title>ПЛАНЕТ ФИТНЕС</title>
 
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="chat-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
 
     <style>
@@ -315,6 +316,61 @@ window.onload = () => {
         </div>
         <input type="file" id="profileImageInput" accept="image/*">
         <button onclick="uploadProfilePicture()">Зачувај слика</button>
+    </div>
+</div>
+
+<!-- CHATBOT WIDGET -->
+<div class="chat-widget" id="chatWidget">
+    <button class="chat-toggle" id="chatToggle" aria-label="Open chat">
+        <span class="robot-sticker" aria-hidden="false">
+            <!-- Larger robot SVG with waving arm (arm group id="robot-arm") -->
+            <svg width="48" height="48" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Робот" preserveAspectRatio="xMidYMid meet">
+                <title>Робот</title>
+                <!-- body circle -->
+                <g id="robot-root" fill="none" stroke="none">
+                    <circle cx="32" cy="30" r="16" fill="currentColor" />
+                    <!-- eyes -->
+                    <circle cx="26" cy="28" r="2.5" fill="#111" />
+                    <circle cx="38" cy="28" r="2.5" fill="#111" />
+                    <!-- mouth -->
+                    <rect x="26" y="34" width="12" height="2.5" rx="1" fill="#111" />
+                    <!-- antenna left/right bases -->
+                    <rect x="20" y="14" width="4" height="4" rx="1" fill="currentColor" />
+                    <rect x="40" y="14" width="4" height="4" rx="1" fill="currentColor" />
+                </g>
+
+                <!-- waving arm (extends outside the circular sticker) -->
+                <g id="robot-arm" transform-origin="50% 50%" style="transform-box: fill-box;">
+                    <!-- shoulder pivot near right edge of body -->
+                    <rect x="46" y="26" width="3" height="6" rx="1" fill="currentColor" />
+                    <!-- upper arm -->
+                    <rect x="49" y="26" width="12" height="3" rx="1.5" fill="currentColor" />
+                    <!-- lower arm and hand -->
+                    <g>
+                        <rect x="61" y="25" width="10" height="3" rx="1.5" fill="#ffd8bf" />
+                        <circle cx="72" cy="26.5" r="2.2" fill="#ffd8bf" />
+                    </g>
+                </g>
+            </svg>
+        </span>
+        Чат
+    </button>
+    <div class="chat-window" id="chatWindow" aria-hidden="true">
+        <div class="chat-header">
+            <span>Фитнес Помош</span>
+            <button class="chat-close" id="chatClose" aria-label="Close chat">×</button>
+        </div>
+        <div class="chat-suggestions" id="chatSuggestions">
+            <button class="chat-suggestion" data-question="Кое е работното време на теретаната?">Работно време</button>
+            <button class="chat-suggestion" data-question="Колку е месечна чланарина?">Месечна чланарина</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-message bot">Здраво! Можам да помогнам со прашања за фитнес, членарини и тренери.</div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" placeholder="Напиши прашање..." aria-label="Chat input">
+            <button id="chatSend">Прати</button>
+        </div>
     </div>
 </div>
 

@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     updateUI();
     initMembers();
+    initChatWidget();
     initScrollAnimations();
 
     // ================= TOP BUTTON =================
@@ -528,6 +529,107 @@ document.addEventListener('DOMContentLoaded', () => {
         userAvatar.addEventListener('click', openProfilePicture);
     }
 });
+
+function initChatWidget() {
+    const chatToggle = document.getElementById('chatToggle');
+    const chatWindow = document.getElementById('chatWindow');
+    const chatClose = document.getElementById('chatClose');
+    const chatSend = document.getElementById('chatSend');
+    const chatInput = document.getElementById('chatInput');
+    const messageContainer = document.getElementById('chatMessages');
+    const suggestions = Array.from(document.querySelectorAll('.chat-suggestion'));
+
+    if (!chatToggle || !chatWindow || !chatClose || !chatSend || !chatInput || !messageContainer) {
+        return;
+    }
+
+    function resetChatDialog() {
+        messageContainer.innerHTML = '';
+        addChatMessage('Здраво! Можам да помогнам со прашања за фитнес, членарини и тренери.', 'bot');
+        chatInput.value = '';
+    }
+
+    function setChatVisible(show) {
+        const wasOpen = chatWindow.classList.contains('show');
+        chatWindow.classList.toggle('show', show);
+        chatWindow.setAttribute('aria-hidden', !show);
+        if (show) {
+            if (!wasOpen) {
+                resetChatDialog();
+            }
+            chatInput.focus();
+        }
+    }
+
+    function addChatMessage(text, sender) {
+        const messageEl = document.createElement('div');
+        messageEl.className = `chat-message ${sender}`;
+        messageEl.innerText = text;
+        messageContainer.appendChild(messageEl);
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+    }
+
+    function getChatbotResponse(input) {
+        const normalized = input.trim().toLowerCase();
+
+        if (normalized.includes('кое е работното време') || normalized.includes('работно време')) {
+            return 'Понеделник - Петок: 06:00 - 00:00.\nСабота: 08:00 - 22:00.\nНедела: 09:00 - 22:00.';
+        }
+        if (normalized.includes('колку е месечна чланарина') || normalized.includes('чланарина')) {
+            return 'VIP: 2500 ден.\nPremium: 1500 ден.\nBasic: 1000 ден.';
+        }
+        if (/плати|пари/.test(normalized)) {
+            return 'Основниот пакет е 1000 ден, Premium е 1500 ден, а VIP е 2500 ден.';
+        }
+        if (/отворено|open|час/.test(normalized)) {
+            return 'Работното време е од 08:00 до 22:00 во работните денови и од 09:00 до 17:00 во сабота.';
+        }
+        if (/продавниц|shop|купување/.test(normalized)) {
+            return 'Погледни ја нашата продавница преку линкот "Продавница" во навигацијата.';
+        }
+        if (/bmi|калкулатор|тежина|висина/.test(normalized)) {
+            return 'За BMI користи го калкулаторот на страницата со висина во cm и тежина во kg.';
+        }
+
+        return 'Се извинувам, не можам точно да одговорам, но можам да ти помогнам со прашања за фитнес, членарини и тренери.';
+    }
+
+    function sendChatMessage(text) {
+        if (!text) return;
+
+        addChatMessage(text, 'user');
+        chatInput.value = '';
+
+        setTimeout(() => {
+            addChatMessage(getChatbotResponse(text), 'bot');
+        }, 400);
+    }
+
+    function sendChatMessageFromButton(question) {
+        const text = question.trim();
+        if (!text) return;
+        addChatMessage(text, 'user');
+        setTimeout(() => {
+            addChatMessage(getChatbotResponse(text), 'bot');
+        }, 400);
+    }
+
+    suggestions.forEach(button => {
+        button.addEventListener('click', () => {
+            sendChatMessageFromButton(button.dataset.question || button.innerText);
+        });
+    });
+
+    chatToggle.addEventListener('click', () => setChatVisible(!chatWindow.classList.contains('show')));
+    chatClose.addEventListener('click', () => setChatVisible(false));
+    chatSend.addEventListener('click', () => sendChatMessage(chatInput.value.trim()));
+    chatInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            sendChatMessage(chatInput.value.trim());
+        }
+    });
+}
 
 // ================= SCROLL ANIMATIONS =================
 function initScrollAnimations() {
