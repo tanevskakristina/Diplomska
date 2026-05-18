@@ -67,6 +67,8 @@
 
         <input type="text" id="customerName" placeholder="Име и презиме">
 
+        <input type="email" id="customerEmail" placeholder="Email адреса">
+
         <input type="text" id="customerAddress" placeholder="Адреса за достава">
 
         <input type="text" id="customerPhone" placeholder="Телефон">
@@ -144,11 +146,19 @@ function closeOrder(){
 
 async function finishOrder(){
     const name = document.getElementById("customerName").value;
+    const email = document.getElementById("customerEmail").value;
     const address = document.getElementById("customerAddress").value;
     const phone = document.getElementById("customerPhone").value;
 
-    if(!name || !address || !phone){
+    if(!name || !email || !address || !phone){
         document.getElementById("orderMessage").innerText = "Пополнете ги сите полиња!";
+        return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        document.getElementById("orderMessage").innerText = "Внесете валидна email адреса!";
         return;
     }
 
@@ -162,16 +172,18 @@ async function finishOrder(){
                 productId: currentProductId,
                 productName: currentProductName,
                 customerName: name,
+                customerEmail: email,
                 customerAddress: address,
                 customerPhone: phone
             })
         });
 
         if (response.ok) {
-            document.getElementById("orderMessage").innerText = "Нарачката е успешно испратена!";
+            document.getElementById("orderMessage").innerText = "Нарачката е успешно испратена! Проверете ја вашата email за потврда.";
             
             // Clear the form
             document.getElementById("customerName").value = "";
+            document.getElementById("customerEmail").value = "";
             document.getElementById("customerAddress").value = "";
             document.getElementById("customerPhone").value = "";
             
@@ -180,7 +192,8 @@ async function finishOrder(){
                 closeOrder();
             }, 2000);
         } else {
-            document.getElementById("orderMessage").innerText = "Грешка при пратање на нарачката.";
+            const error = await response.json();
+            document.getElementById("orderMessage").innerText = error.message || "Грешка при пратање на нарачката.";
         }
     } catch (error) {
         console.error("Error:", error);

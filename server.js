@@ -7,8 +7,12 @@ const bcrypt = require("bcryptjs");
 const userRoutes = require("./routes/users");
 const productRoutes = require("./routes/products");
 const testimonialsRoutes = require("./routes/testimonials");
+const { initializeTransporter } = require("./emailService");
 
 dotenv.config();
+
+// Initialize email service after dotenv.config()
+initializeTransporter();
 
 const app = express();
 

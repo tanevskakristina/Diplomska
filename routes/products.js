@@ -5,6 +5,7 @@ const path = require("path");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
 const adminAuth = require("../middleware/adminAuth");
+const { sendOrderConfirmation } = require("../emailService");
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -66,10 +67,16 @@ router.post("/", adminAuth, upload.single("image"), async (req, res) => {
 // POST create new order
 router.post("/orders", async (req, res) => {
     try {
-        const { productName, productId, customerName, customerAddress, customerPhone } = req.body;
+        const { productName, productId, customerName, customerEmail, customerAddress, customerPhone } = req.body;
 
-        if ((!productName && !productId) || !customerName || !customerAddress || !customerPhone) {
+        if ((!productName && !productId) || !customerName || !customerEmail || !customerAddress || !customerPhone) {
             return res.status(400).json({ message: "All fields are required" });
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(customerEmail)) {
+            return res.status(400).json({ message: "Invalid email format" });
         }
 
         // Prefer productId for lookup when provided
@@ -91,12 +98,18 @@ router.post("/orders", async (req, res) => {
             productId: product ? product._id : undefined,
             productImage: product ? product.image : undefined,
             customerName,
+            customerEmail,
             customerAddress,
             customerPhone,
             paymentMethod: "Плаќање при достава"
         });
 
         await order.save();
+
+        // Send confirmation email asynchronously
+        sendOrderConfirmation(order).catch(err => {
+            console.error('Failed to send confirmation email:', err);
+        });
 
         res.status(201).json({
             message: "Order created successfully",
