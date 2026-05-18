@@ -223,7 +223,18 @@ window.onload = () => {
     <div class="testimonial-form">
         <input type="text" id="userName" placeholder="Име">
         <textarea id="userMessage" placeholder="Твоето мислење"></textarea>
-        <button onclick="addTestimonial()">Испрати</button>
+        <label for="userRating" style="display:block;margin:8px 0;color:#ffd6c8;">Оцена:</label>
+        <select id="userRating" style="padding:8px;border-radius:6px;background:#1a1a1a;color:#fff;border:1px solid #2a2a2a;">
+            <option value="5">⭐⭐⭐⭐⭐ - Одлично</option>
+            <option value="4">⭐⭐⭐⭐ - Многу добро</option>
+            <option value="3">⭐⭐⭐ - Добро</option>
+            <option value="2">⭐⭐ - Може подобро</option>
+            <option value="1">⭐ - Лошо</option>
+        </select>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:10px;">
+            <button onclick="addTestimonial()">Испрати</button>
+            <button onclick="window.location.href='testimonials.html'">Види сите мислења</button>
+        </div>
     </div>
 
     <!-- LIST -->

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="mk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Orders</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <nav class="navbar">
+
+        <h2 class="logo">ПЛАНЕТ ФИТНЕС SHOP</h2>
+
+        <div class="nav-buttons">
+            <button onclick="window.location.href='./index.html'">Почетна</button>
+            <button onclick="window.location.href='./shop.html'">Продавница</button>
+            <button onclick="window.location.href='./add-product.html'">Додади производ</button>
+        </div>
+
+    </nav>
+</header>
+
+<section class="shop-page">
+    <h1>Админ: Нарачки</h1>
+
+    <div class="admin-orders-page">
+        <p id="adminPageMessage">Вчитување...</p>
+        <div class="orders-list">
+            <table id="adminOrdersTable">
+                <thead>
+                    <tr>
+                            <th>Слика</th>
+                        <th>Производ</th>
+                        <th>Име</th>
+                        <th>Адреса</th>
+                        <th>Телефон</th>
+                        <th>Време</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<script>
+async function loadAdminOrdersPage() {
+    const messageEl = document.getElementById("adminPageMessage");
+    const tableBody = document.querySelector("#adminOrdersTable tbody");
+    const token = localStorage.getItem("adminToken");
+
+    if (!token) {
+        messageEl.innerText = "Немате дозвола за пристап. Ве молиме најавете се како администратор.";
+        if (tableBody) tableBody.innerHTML = "";
+        return;
+    }
+
+    try {
+        messageEl.innerText = "Вчитување нарачки...";
+
+        const response = await fetch("/api/products/orders", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            messageEl.innerText = errorData.message || "Грешка при пристап до нарачките.";
+            return;
+        }
+
+        const orders = await response.json();
+        if (!orders.length) {
+            messageEl.innerText = "Нема нарачки.", tableBody.innerHTML = "<tr><td colspan='5'>Нема нарачки.</td></tr>";
+            return;
+        }
+
+        messageEl.innerText = `Пронајдени се ${orders.length} нарачки.`;
+        tableBody.innerHTML = orders.map(order => `
+            <tr>
+                <td><img class="order-thumb" src="${order.productImage || ''}" alt="" onerror="this.style.visibility='hidden'"></td>
+                <td>${order.productName}</td>
+                <td>${order.customerName}</td>
+                <td>${order.customerAddress}</td>
+                <td>${order.customerPhone}</td>
+                <td>${new Date(order.createdAt).toLocaleString('mk-MK')}</td>
+            </tr>
+        `).join("");
+    } catch (error) {
+        console.error("Error loading admin orders:", error);
+        messageEl.innerText = "Грешка при вчитување на нарачките.";
+    }
+}
+
+window.onload = loadAdminOrdersPage;
+</script>
+
+</body>
+</html>

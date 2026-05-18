@@ -261,6 +261,8 @@ button:hover{
 
 .price-card:hover{
     transform:scale(1.05);
+    background:#161616;
+    box-shadow:0 20px 50px rgba(0,0,0,0.45);
 }
 
 .price-card{
@@ -273,13 +275,95 @@ button:hover{
 
 .price{
     font-size:28px;
-    color:#ff3c00;
+    color:#ff7b3b;
     margin-bottom:20px;
+    transition: color 0.3s ease;
+}
+
+.price-card:hover .price {
+    color:#d47a2c;
+}
+
+.shop-layout {
+    display:flex;
+    gap:30px;
+    align-items:flex-start;
+    justify-content:space-between;
+    margin-top:30px;
+}
+
+.shop-main {
+    flex:2;
+    min-width:320px;
+}
+
+.shop-sidebar {
+    flex:1;
+    min-width:280px;
+    background:#121212;
+    border:1px solid #222;
+    border-radius:14px;
+    padding:22px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+}
+
+.shop-sidebar h2 {
+    margin-bottom:12px;
+    color:#ff7b3b;
+}
+
+.shop-sidebar p {
+    color:#ccc;
+    margin-bottom:16px;
+    line-height:1.6;
+}
+
+.shop-sidebar button {
+    width:100%;
+    margin-bottom:18px;
+}
+
+.orders-list {
+    overflow-x:auto;
+}
+
+#ordersTable {
+    width:100%;
+    border-collapse:collapse;
+    font-size:14px;
+}
+
+#ordersTable th,
+#ordersTable td {
+    padding:10px 8px;
+    border-bottom:1px solid #2a2a2a;
+    text-align:left;
+}
+
+#ordersTable th {
+    color:#ffb57f;
+}
+
+#ordersTable tr:nth-child(even) {
+    background:rgba(255,255,255,0.03);
+}
+
+.admin-message {
+    color:#ffcc99;
+    margin-bottom:12px;
+}
+
+.order-thumb{
+    width:60px;
+    height:40px;
+    object-fit:cover;
+    border-radius:6px;
+    display:block;
 }
 
 .price-card ul{
     list-style:none;
-    color:#ccc;
+    color:#c00ccc;
     margin-bottom:20px;
 }
 
@@ -728,6 +812,12 @@ button:hover{
 
 .testimonial-card h4{
     color:#ff3c00;
+}
+
+.testimonial-rating{
+    color:#ffd36b;
+    font-size:16px;
+    margin-bottom:8px;
 }
 
 .add-testimonial{
@@ -1429,4 +1519,8 @@ html{
     margin-top: 20px;
     color: #ff3c00;
     font-weight: 500;
+}
+
+.card-click:hover{
+    background-color: rgba(255, 60, 0, 0.1);
 }

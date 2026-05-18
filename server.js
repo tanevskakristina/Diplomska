@@ -6,6 +6,7 @@ const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const userRoutes = require("./routes/users");
 const productRoutes = require("./routes/products");
+const testimonialsRoutes = require("./routes/testimonials");
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/testimonials", testimonialsRoutes);
 
 app.use(express.static(path.join(__dirname, "public")));
 

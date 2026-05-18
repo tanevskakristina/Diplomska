@@ -22,6 +22,9 @@
             <button id="addProductBtn" onclick="window.location.href='./add-product.html'">
                 Додади производ
             </button>
+            <button id="adminOrdersBtn" onclick="window.location.href='./admin-orders.html'" style="display:none;">
+                Нарачки
+            </button>
         </div>
 
     </nav>
@@ -31,20 +34,25 @@
 
     <h1> Fitness Shop</h1>
 
-    <div class="filter-group">
-        <label for="categoryFilter">Избери категорија:</label>
-        <select id="categoryFilter">
-            <option value="all" selected>Сите категории</option>
-            <option value="Креатин">Креатин</option>
-            <option value="Протеин">Протеин</option>
-            <option value="Согорувач на масти">Согорувач на масти</option>
-            <option value="Гејнер">Гејнер</option>
-            <option value="Аминокиселини">Аминокиселини</option>
-        </select>
-    </div>
+    <div class="shop-layout">
+        <div class="shop-main">
+            <div class="filter-group">
+                <label for="categoryFilter">Избери категорија:</label>
+                <select id="categoryFilter">
+                    <option value="all" selected>Сите категории</option>
+                    <option value="Креатин">Креатин</option>
+                    <option value="Протеин">Протеин</option>
+                    <option value="Согорувач на масти">Согорувач на масти</option>
+                    <option value="Гејнер">Гејнер</option>
+                    <option value="Аминокиселини">Аминокиселини</option>
+                </select>
+            </div>
 
-    <div class="shop-container" id="shopContainer">
-        <!-- Products will be loaded here -->
+            <div class="shop-container" id="shopContainer">
+                <!-- Products will be loaded here -->
+            </div>
+        </div>
+
     </div>
 
 </section>
@@ -79,7 +87,8 @@
 
 <script>
 
-let currentProduct = "";
+let currentProductId = "";
+let currentProductName = "";
 let allProducts = [];
 
 async function loadProducts() {
@@ -114,24 +123,26 @@ function renderProducts(filterCategory = "all") {
             <h3>${product.name}</h3>
             <p class="product-category">Категорија: ${product.category}</p>
             <p class="product-price">${product.price} ден</p>
-            <button onclick="orderProduct('${product.name}')">Нарачај</button>
+            <button onclick="orderProduct('${product._id}')">Нарачај</button>
         `;
 
         container.appendChild(productCard);
     });
 }
 
-function orderProduct(product){
-    currentProduct = product;
+function orderProduct(productId){
+    const product = allProducts.find(p => p._id === productId);
+    currentProductId = productId;
+    currentProductName = product ? product.name : "";
     document.getElementById("orderModal").style.display = "flex";
-    document.getElementById("selectedProduct").innerText = "Производ: " + product;
+    document.getElementById("selectedProduct").innerText = "Производ: " + (product ? product.name : productId);
 }
 
 function closeOrder(){
     document.getElementById("orderModal").style.display = "none";
 }
 
-function finishOrder(){
+async function finishOrder(){
     const name = document.getElementById("customerName").value;
     const address = document.getElementById("customerAddress").value;
     const phone = document.getElementById("customerPhone").value;
@@ -141,25 +152,57 @@ function finishOrder(){
         return;
     }
 
-    document.getElementById("orderMessage").innerText = "Нарачката е успешно испратена!";
+    try {
+        const response = await fetch("/api/products/orders", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                productId: currentProductId,
+                productName: currentProductName,
+                customerName: name,
+                customerAddress: address,
+                customerPhone: phone
+            })
+        });
 
-    console.log({
-        product: currentProduct,
-        name,
-        address,
-        phone,
-        payment: "Плаќање при достава"
-    });
+        if (response.ok) {
+            document.getElementById("orderMessage").innerText = "Нарачката е успешно испратена!";
+            
+            // Clear the form
+            document.getElementById("customerName").value = "";
+            document.getElementById("customerAddress").value = "";
+            document.getElementById("customerPhone").value = "";
+            
+            // Close modal after 2 seconds
+            setTimeout(() => {
+                closeOrder();
+            }, 2000);
+        } else {
+            document.getElementById("orderMessage").innerText = "Грешка при пратање на нарачката.";
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        document.getElementById("orderMessage").innerText = "Грешка при пратање на нарачката.";
+    }
 }
 
 function updateProductButton() {
     const token = localStorage.getItem("token");
+    const adminToken = localStorage.getItem("adminToken");
     const addProductBtn = document.getElementById("addProductBtn");
+    const adminOrdersBtn = document.getElementById("adminOrdersBtn");
 
-    if (token) {
+    if (adminToken) {
+        addProductBtn.style.display = "inline-block";
+        if (adminOrdersBtn) adminOrdersBtn.style.display = "inline-block";
+    } else if (token) {
         addProductBtn.style.display = "none";
+        if (adminOrdersBtn) adminOrdersBtn.style.display = "none";
     } else {
         addProductBtn.style.display = "block";
+        if (adminOrdersBtn) adminOrdersBtn.style.display = "none";
     }
 }
 

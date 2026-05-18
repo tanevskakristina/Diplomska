@@ -86,41 +86,61 @@ function increaseMembers() {
 // ================= TESTIMONIALS =================
 function addTestimonial() {
 
-    let name = document.getElementById("userName").value;
-    let message = document.getElementById("userMessage").value;
+    const name = document.getElementById("userName").value;
+    const message = document.getElementById("userMessage").value;
+    const ratingEl = document.getElementById("userRating");
+    const rating = ratingEl ? ratingEl.value : null;
 
-    if (!name || !message) return alert("Пополнете!");
+    if (!name || !message || !rating) return alert("Пополнете го името, пораката и оцената!");
 
-    let testimonials = JSON.parse(localStorage.getItem("testimonials")) || [];
-
-    testimonials.push({ name, message });
-
-    localStorage.setItem("testimonials", JSON.stringify(testimonials));
-
-    document.getElementById("userName").value = "";
-    document.getElementById("userMessage").value = "";
-
-    loadTestimonials();
+    fetch('/api/testimonials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, message, rating })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.testimonial) {
+            document.getElementById("userName").value = "";
+            document.getElementById("userMessage").value = "";
+            if (ratingEl) ratingEl.value = "5";
+            // Do not load testimonials here (index should not display them)
+            alert('Успешно пратено! Благодарам.');
+        } else {
+            alert(data.message || 'Грешка при праќање');
+        }
+    })
+    .catch(err => {
+        console.error('Error saving testimonial:', err);
+        alert('Грешка при праќање');
+    });
 }
 
 function loadTestimonials() {
-
-    let container = document.querySelector(".testimonial-container");
-
+    const container = document.querySelector(".testimonial-container");
     if (!container) return;
+    container.innerHTML = "<p>Вчитување...</p>";
 
-    container.innerHTML = "";
+    fetch('/api/testimonials')
+    .then(res => res.json())
+    .then(data => {
+        container.innerHTML = "";
+        if (!data || data.length === 0) {
+            container.innerHTML = "<p>Сè уште нема мислења.</p>";
+            return;
+        }
 
-    let testimonials = JSON.parse(localStorage.getItem("testimonials")) || [];
-
-    testimonials.forEach(t => {
-
-        let div = document.createElement("div");
-        div.classList.add("testimonial-card");
-
-        div.innerHTML = `<p>"${t.message}"</p><h4>- ${t.name}</h4>`;
-
-        container.appendChild(div);
+        data.forEach(t => {
+            const div = document.createElement("div");
+            div.classList.add("testimonial-card");
+            const stars = '★'.repeat(t.rating || 0) + '☆'.repeat(5 - (t.rating || 0));
+            div.innerHTML = `<div class="testimonial-rating">${stars}</div><p>"${t.message}"</p><h4>- ${t.name}</h4>`;
+            container.appendChild(div);
+        });
+    })
+    .catch(err => {
+        console.error('Error loading testimonials', err);
+        container.innerHTML = "<p>Грешка при вчитување.</p>";
     });
 }
 

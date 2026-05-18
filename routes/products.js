@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require("multer");
 const path = require("path");
 const Product = require("../models/Product");
+const Order = require("../models/Order");
 const adminAuth = require("../middleware/adminAuth");
 
 // Configure multer for file uploads
@@ -28,6 +29,16 @@ router.get("/", async (req, res) => {
     }
 });
 
+// GET all orders (admin only)
+router.get("/orders", adminAuth, async (req, res) => {
+    try {
+        const orders = await Order.find().sort({ createdAt: -1 });
+        res.json(orders);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // POST add new product
 router.post("/", adminAuth, upload.single("image"), async (req, res) => {
     try {
@@ -46,6 +57,50 @@ router.post("/", adminAuth, upload.single("image"), async (req, res) => {
         res.status(201).json({
             message: "Product added successfully",
             product
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// POST create new order
+router.post("/orders", async (req, res) => {
+    try {
+        const { productName, productId, customerName, customerAddress, customerPhone } = req.body;
+
+        if ((!productName && !productId) || !customerName || !customerAddress || !customerPhone) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        // Prefer productId for lookup when provided
+        let product = null;
+        if (productId) {
+            try {
+                product = await Product.findById(productId);
+            } catch (err) {
+                product = null;
+            }
+        }
+
+        if (!product && productName) {
+            product = await Product.findOne({ name: productName });
+        }
+
+        const order = new Order({
+            productName: product ? product.name : productName,
+            productId: product ? product._id : undefined,
+            productImage: product ? product.image : undefined,
+            customerName,
+            customerAddress,
+            customerPhone,
+            paymentMethod: "Плаќање при достава"
+        });
+
+        await order.save();
+
+        res.status(201).json({
+            message: "Order created successfully",
+            order
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
