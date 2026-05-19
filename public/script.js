@@ -699,6 +699,12 @@ function initChatWidget() {
         if (normalized.includes('колку е месечна чланарина') || normalized.includes('чланарина')) {
             return 'VIP: 2500 ден.\nPremium: 1500 ден.\nBasic: 1000 ден.';
         }
+        if (normalized.includes('Колку години постои теретаната') || normalized.includes('колку години')) {
+            return 'Нашата теретана постои од 2010 година, со повеќе од 14 години искуство во фитнес индустријата.';
+        }
+        if (normalized.includes('Кој тренер има најмногу искуство') || normalized.includes('најискусен тренер')) {
+            return 'Нашиот најискусен тренер е Милена Костовска, со над 20 години искуство во фитнес тренинг и персонален тренинг.';
+        }
         if (/плати|пари/.test(normalized)) {
             return 'Основниот пакет е 1000 ден, Premium е 1500 ден, а VIP е 2500 ден.';
         }
