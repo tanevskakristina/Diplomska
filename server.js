@@ -7,6 +7,7 @@ const bcrypt = require("bcryptjs");
 const userRoutes = require("./routes/users");
 const productRoutes = require("./routes/products");
 const testimonialsRoutes = require("./routes/testimonials");
+const trainersRoutes = require("./routes/trainers");
 const { initializeTransporter } = require("./emailService");
 
 dotenv.config();
@@ -21,6 +22,7 @@ app.use(express.json());
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/testimonials", testimonialsRoutes);
+app.use("/api/trainers", trainersRoutes);
 
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -55,8 +57,7 @@ mongoose.connect(process.env.MONGO_URI)
     const Product = require("./models/Product");
     const count = await Product.countDocuments();
     if (count === 0) {
-        await Product.insertMany(initialProducts);
-        console.log("Initial products added");
+        console.log("No products found. Add products through admin panel.");
     }
 })
 .catch((err) => console.log(err));

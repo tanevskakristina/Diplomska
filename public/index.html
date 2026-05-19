@@ -100,17 +100,17 @@ window.onload = () => {
 <section class="stats">
 
     <div class="stat">
-        <h2 class="counter" id="membersCount" data-target="1200">0</h2>
+        <h2 class="counter" id="membersCount" data-target="50">0</h2>
         <p>Членови</p>
     </div>
 
     <div class="stat">
-        <h2 class="counter" data-target="50">0</h2>
+        <h2 class="counter" id="trainersCount" data-target="50">0</h2>
         <p>Тренери</p>
     </div>
 
     <div class="stat">
-        <h2 class="counter" data-target="10">0</h2>
+        <h2 class="counter" id="experienceCount" data-target="10">0</h2>
         <p>Години искуство</p>
     </div>
 
@@ -120,53 +120,9 @@ window.onload = () => {
 
 
 <section class="trainers" id="trainers">
+    <h2>Тренери</h2>
 <div class="trainer-container">
-
-    <!-- TRAINER 1 -->
-    <div class="trainer-card" data-type="strength"
-    onclick="openTrainer(
-    'Марко Стојанов',
-    'Силов тренинг',
-    'Марко Стојанов е фитнес тренер специјализиран за силов тренинг со повеќегодишно искуство во работа со рекреативци и спортисти.',
-    'https://images.unsplash.com/photo-1550345332-09e3ac987658?w=500'
-    )">
-
-        <img src="https://images.unsplash.com/photo-1550345332-09e3ac987658?w=500">
-        <h3>Марко Стојанов</h3>
-        <p>Силов тренинг</p>
-
-    </div>
-    
-    <!-- TRAINER 2 -->
-    <div class="trainer-card" data-type="cardio"
-    onclick="openTrainer(
-    'Ана Петрова',
-    'Кардио',
-    'Ана Петрова е кардио инструктор со искуство во групни и индивидуални тренинзи.',
-    'https://images.unsplash.com/photo-1609899537878-88d5ba429bdb?w=500'
-    )">
-
-        <img src="//images.unsplash.com/photo-1609899537878-88d5ba429bdb?w=500">
-        <h3>Ана Петрова</h3>
-        <p>Кардио</p>
-
-    </div>
-
-    <!-- TRAINER 3 -->
-    <div class="trainer-card" data-type="bodybuilding"
-    onclick="openTrainer(
-    'Иван Николов',
-    'Bodybuilding',
-    'Иван Николов е тренер специјализиран за bodybuilding и трансформација на телото.',
-    'https://images.unsplash.com/photo-1594381898411-846e7d193883?w=500'
-    )">
-
-        <img src="https://images.unsplash.com/photo-1594381898411-846e7d193883?w=500">
-        <h3>Иван Николов</h3>
-        <p>Bodybuilding</p>
-
-    </div>
-
+    <p style="text-align: center; color: #aaa;">Вчитување на тренери...</p>
 </div>
 </section>
 <!-- BMI -->
@@ -265,6 +221,11 @@ window.onload = () => {
     <p>Битола, Македонија</p>
     <p>070 810 596</p>
     <p>planetfitnes@gmail.com</p>
+    <p>Работно време: Пон-Пет 08:00-22:00, Саб 10:00-18:00, Нед 12:00-16:00</p>
+    <div class="social-links">
+        <a href="https://www.facebook.com/planetfitnes" aria-label="Facebook" target="_blank"><img src="/uploads/facebook.png" alt="Facebook"></a>
+        <a href="https://www.instagram.com/planetfitnes" aria-label="Instagram" target="_blank"><img src="/uploads/instagram.png" alt="Instagram"></a>
+        <a href="https://twitter.com/planetfitnes" aria-label="Twitter" target="_blank"><img src="/uploads/twitter.png" alt="Twitter"></a>
 </footer>
 
 <button id="topBtn">⬆</button>

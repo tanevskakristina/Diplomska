@@ -4,6 +4,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     updateUI();
     initMembers();
+    initTrainersCount();
+    initExperienceCount();
+    loadTrainers();
     initChatWidget();
     initScrollAnimations();
 
@@ -58,32 +61,108 @@ window.openMembership = openMembership;
 
 // ================= MEMBERS =================
 function initMembers() {
-
-    let members = localStorage.getItem("membersCount");
-
-    if (!members) {
-        members = 1200;
-        localStorage.setItem("membersCount", members);
-    }
-
-    document.getElementById("membersCount").innerText = members;
+    fetch('/api/users/members/count')
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("membersCount").innerText = data.count || 0;
+    })
+    .catch(err => {
+        console.error('Error fetching member count:', err);
+        document.getElementById("membersCount").innerText = "0";
+    });
 }
 
-function increaseMembers() {
-
-    let members = localStorage.getItem("membersCount");
-
-    if (!members) members = 1200;
-
-    members = parseInt(members) + 1;
-
-    localStorage.setItem("membersCount", members);
-
-    document.getElementById("membersCount").innerText = members;
+function refreshMembers() {
+    initMembers();
 }
 
 
-// ================= TESTIMONIALS =================
+// ================= TRAINERS COUNT =================
+function initTrainersCount() {
+    fetch('/api/trainers/count/total')
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("trainersCount").innerText = data.count || 0;
+    })
+    .catch(err => {
+        console.error('Error fetching trainers count:', err);
+        document.getElementById("trainersCount").innerText = "0";
+    });
+}
+
+
+// ================= EXPERIENCE COUNT =================
+function initExperienceCount() {
+    fetch('/api/trainers/experience/total')
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("experienceCount").innerText = data.totalExperience || 0;
+    })
+    .catch(err => {
+        console.error('Error fetching experience count:', err);
+        document.getElementById("experienceCount").innerText = "0";
+    });
+}
+
+
+// ================= TRAINERS =================
+function loadTrainers() {
+    fetch('/api/trainers')
+    .then(res => res.json())
+    .then(data => {
+        const container = document.querySelector(".trainer-container");
+        if (!container) return;
+
+        container.innerHTML = "";
+
+        if (!data || data.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: #aaa;">Сè уште нема додадено тренери.</p>';
+            return;
+        }
+
+        // Show only first 3 trainers
+        const trainersToShow = data.slice(0, 3);
+
+        trainersToShow.forEach(trainer => {
+            const div = document.createElement("div");
+            div.classList.add("trainer-card");
+            div.innerHTML = `
+                <img src="${trainer.photo}" alt="${trainer.name}">
+                <h3>${trainer.name} ${trainer.surname}</h3>
+                <p>${trainer.specialty || 'Фитнес тренер'}</p>
+            `;
+            container.appendChild(div);
+        });
+
+        // If more than 3 trainers, add view all link
+        if (data.length > 3) {
+            const viewAllDiv = document.createElement("div");
+            viewAllDiv.style.gridColumn = "1 / -1";
+            viewAllDiv.style.textAlign = "center";
+            viewAllDiv.style.padding = "20px";
+            viewAllDiv.innerHTML = `
+                <a href="all-trainers.html" style="
+                    display: inline-block;
+                    background: #ffd6c8;
+                    color: #000;
+                    padding: 12px 30px;
+                    border-radius: 6px;
+                    text-decoration: none;
+                    font-weight: bold;
+                    transition: background 0.3s ease;
+                ">Видете сите ${data.length} тренери</a>
+            `;
+            container.appendChild(viewAllDiv);
+        }
+    })
+    .catch(err => {
+        console.error('Error loading trainers:', err);
+        const container = document.querySelector(".trainer-container");
+        if (container) {
+            container.innerHTML = '<p style="text-align: center; color: #ff6b6b;">Грешка при вчитување на тренери</p>';
+        }
+    });
+}
 function addTestimonial() {
 
     const name = document.getElementById("userName").value;
@@ -206,6 +285,7 @@ function registerUser() {
     .then(data => {
         if (data.message === "User registered successfully") {
             document.getElementById("authMessage").innerText = "Успешна регистрација!";
+            refreshMembers();
             // Clear form
             document.getElementById("regName").value = "";
             document.getElementById("regSurname").value = "";
@@ -317,12 +397,33 @@ function updateUI() {
         if (userAvatar) userAvatar.style.display = "flex";
         // Display avatar with picture or initials
         displayUserAvatar();
+
+        // Show admin link if admin is logged in
+        if (adminToken) {
+            let adminLink = document.getElementById("adminLink");
+            if (!adminLink) {
+                adminLink = document.createElement("a");
+                adminLink.id = "adminLink";
+                adminLink.href = "admin-trainers.html";
+                adminLink.style.color = "#ffd6c8";
+                adminLink.style.marginRight = "15px";
+                adminLink.style.textDecoration = "none";
+                adminLink.style.fontWeight = "bold";
+                adminLink.innerText = "Администратор";
+                welcome.parentElement.insertBefore(adminLink, welcome.nextSibling);
+            }
+            adminLink.style.display = "inline-block";
+        }
     } else {
         welcome.innerText = "";
         loginBtn.style.display = "inline-block";
         logoutBtn.style.display = "none";
         if (registerBtn) registerBtn.style.display = "block";
         if (userAvatar) userAvatar.style.display = "none";
+
+        // Hide admin link if not admin
+        let adminLink = document.getElementById("adminLink");
+        if (adminLink) adminLink.style.display = "none";
     }
 }
 

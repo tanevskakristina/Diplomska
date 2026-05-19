@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="mk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сите тренери - ПЛАНЕТ ФИТНЕС</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .trainers-page-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .trainers-page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .trainers-page-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #ffd6c8;
+        }
+
+        .trainers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .trainer-card {
+            background: #1a1a1a;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #2a2a2a;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .trainer-card:hover {
+            transform: translateY(-5px);
+            border-color: #ffd6c8;
+            box-shadow: 0 10px 30px rgba(255, 214, 200, 0.2);
+        }
+
+        .trainer-card-image {
+            width: 100%;
+            height: 300px;
+            overflow: hidden;
+            background: #0a0a0a;
+        }
+
+        .trainer-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .trainer-card:hover .trainer-card-image img {
+            transform: scale(1.05);
+        }
+
+        .trainer-card-content {
+            padding: 20px;
+        }
+
+        .trainer-card-content h3 {
+            color: #ffd6c8;
+            margin: 0 0 10px 0;
+            font-size: 1.5em;
+        }
+
+        .trainer-card-content p {
+            color: #aaa;
+            margin: 5px 0;
+            font-size: 0.95em;
+        }
+
+        .trainer-specialty {
+            background: rgba(255, 214, 200, 0.1);
+            color: #ffd6c8;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 30px;
+            color: #ffd6c8;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 10px 20px;
+            background: #1a1a1a;
+            border-radius: 6px;
+            border: 1px solid #2a2a2a;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: #2a2a2a;
+            border-color: #ffd6c8;
+        }
+
+        @media (max-width: 768px) {
+            .trainers-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 20px;
+            }
+
+            .trainers-page-header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <nav class="navbar">
+        <h2 class="logo">ПЛАНЕТ ФИТНЕС</h2>
+        <a href="index.html" class="back-link">← Назад</a>
+    </nav>
+</header>
+
+<div class="trainers-page-container">
+    <div class="trainers-page-header">
+        <h1>Нашите тренери</h1>
+        <p>Запознајте се со нашиот тим на експертни тренери</p>
+    </div>
+
+    <div class="trainers-grid" id="trainersGrid">
+        <p style="text-align: center; color: #aaa;">Вчитување...</p>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        loadAllTrainers();
+    });
+
+    function loadAllTrainers() {
+        fetch('/api/trainers')
+        .then(res => res.json())
+        .then(data => {
+            const grid = document.getElementById('trainersGrid');
+            
+            if (!data || data.length === 0) {
+                grid.innerHTML = '<p style="text-align: center; color: #aaa; grid-column: 1/-1;">Сè уште нема додадено тренери.</p>';
+                return;
+            }
+
+            grid.innerHTML = data.map(trainer => `
+                <div class="trainer-card">
+                    <div class="trainer-card-image">
+                        <img src="${trainer.photo}" alt="${trainer.name}">
+                    </div>
+                    <div class="trainer-card-content">
+                        <h3>${trainer.name} ${trainer.surname}</h3>
+                        <p>Години: ${trainer.age}</p>
+                        <p>Искуство: ${trainer.yearsOfExperience} години</p>
+                        ${trainer.specialty ? `<div class="trainer-specialty">${trainer.specialty}</div>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        })
+        .catch(err => {
+            console.error('Error loading trainers:', err);
+            document.getElementById('trainersGrid').innerHTML = '<p style="color: #ff6b6b;">Грешка при вчитување на тренери</p>';
+        });
+    }
+</script>
+
+</body>
+</html>

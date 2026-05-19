@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="mk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Управување со тренери</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #ffd6c8;
+            padding-bottom: 20px;
+        }
+
+        .admin-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+
+        .form-section {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .form-section h3 {
+            color: #ffd6c8;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #2a2a2a;
+            border-radius: 6px;
+            background: #0a0a0a;
+            color: #fff;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #ffd6c8;
+            box-shadow: 0 0 5px rgba(255, 214, 200, 0.3);
+        }
+
+        .photo-preview {
+            width: 100%;
+            height: 200px;
+            background: #0a0a0a;
+            border: 2px dashed #2a2a2a;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .photo-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+
+        .trainers-list {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .trainers-list h3 {
+            color: #ffd6c8;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .trainer-item {
+            background: #0a0a0a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #ffd6c8;
+            display: flex;
+            gap: 15px;
+        }
+
+        .trainer-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 6px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .trainer-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .trainer-info {
+            flex: 1;
+        }
+
+        .trainer-info h4 {
+            color: #ffd6c8;
+            margin: 0 0 5px 0;
+        }
+
+        .trainer-info p {
+            margin: 3px 0;
+            color: #aaa;
+            font-size: 0.9em;
+        }
+
+        .trainer-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn-edit {
+            background: #4a90e2;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .btn-edit:hover {
+            background: #357abd;
+        }
+
+        .btn-delete {
+            background: #e24a4a;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .btn-delete:hover {
+            background: #bd3535;
+        }
+
+        .btn-submit {
+            background: #ffd6c8;
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-submit:hover {
+            background: #ffb8a0;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .message.success {
+            background: #2a6a2a;
+            color: #90ee90;
+        }
+
+        .message.error {
+            background: #6a2a2a;
+            color: #ff6b6b;
+        }
+
+        .back-button {
+            background: #ffd6c8;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-button:hover {
+            background: #ffb8a0;
+        }
+
+        @media (max-width: 768px) {
+            .admin-content {
+                grid-template-columns: 1fr;
+            }
+
+            .trainer-item {
+                flex-direction: column;
+            }
+
+            .trainer-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .trainer-actions button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <nav class="navbar">
+        <h2 class="logo">ПЛАНЕТ ФИТНЕС - АДМИНИСТРАТОР</h2>
+        <a href="index.html" class="back-button">Назад на почетна</a>
+    </nav>
+</header>
+
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>Управување со тренери</h1>
+        <button onclick="logoutAdmin()" class="back-button">Logout</button>
+    </div>
+
+    <div class="admin-content">
+        <!-- Form Section -->
+        <div class="form-section">
+            <h3 id="formTitle">Додај тренер</h3>
+            <div id="formMessage"></div>
+
+            <form id="trainerForm">
+                <div class="form-group">
+                    <label for="trainerName">Име</label>
+                    <input type="text" id="trainerName" placeholder="Име" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="trainerSurname">Презиме</label>
+                    <input type="text" id="trainerSurname" placeholder="Презиме" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="trainerAge">Години</label>
+                    <input type="number" id="trainerAge" placeholder="Години" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="trainerExperience">Години искуство</label>
+                    <input type="number" id="trainerExperience" placeholder="Години искуство" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="trainerSpecialty">Специјалност (опционално)</label>
+                    <input type="text" id="trainerSpecialty" placeholder="Н.пр. Силов тренинг, Кардио, итн.">
+                </div>
+
+                <div class="form-group">
+                    <label for="trainerPhoto">Слика</label>
+                    <input type="file" id="trainerPhoto" accept="image/*" required>
+                    <div class="photo-preview" id="photoPreview">
+                        <p>Твоја слика ќе се прикажа овде</p>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">Зачувај тренер</button>
+            </form>
+        </div>
+
+        <!-- Trainers List Section -->
+        <div class="trainers-list">
+            <h3>Постојни тренери</h3>
+            <div id="trainersList"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentEditingId = null;
+
+    // Check if user is admin
+    document.addEventListener('DOMContentLoaded', () => {
+        const adminToken = localStorage.getItem("adminToken");
+        if (!adminToken) {
+            alert("Требате да сте логирани како администратор!");
+            window.location.href = "index.html";
+            return;
+        }
+        loadTrainers();
+    });
+
+    // Load trainers list
+    function loadTrainers() {
+        fetch('/api/trainers')
+        .then(res => res.json())
+        .then(data => {
+            const list = document.getElementById('trainersList');
+            if (!data || data.length === 0) {
+                list.innerHTML = '<p style="color: #aaa;">Сè уште нема додадено тренери.</p>';
+                return;
+            }
+
+            list.innerHTML = data.map(trainer => `
+                <div class="trainer-item">
+                    <div class="trainer-photo">
+                        <img src="${trainer.photo}" alt="${trainer.name}">
+                    </div>
+                    <div class="trainer-info">
+                        <h4>${trainer.name} ${trainer.surname}</h4>
+                        <p>Години: ${trainer.age}</p>
+                        <p>Искуство: ${trainer.yearsOfExperience} години</p>
+                        ${trainer.specialty ? `<p>Специјалност: ${trainer.specialty}</p>` : ''}
+                    </div>
+                    <div class="trainer-actions">
+                        <button class="btn-edit" onclick="editTrainer('${trainer._id}')">Уреди</button>
+                        <button class="btn-delete" onclick="deleteTrainer('${trainer._id}')">Избриши</button>
+                    </div>
+                </div>
+            `).join('');
+        })
+        .catch(err => console.error('Error loading trainers:', err));
+    }
+
+    // Handle photo preview
+    document.getElementById('trainerPhoto').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                document.getElementById('photoPreview').innerHTML = `<img src="${event.target.result}" alt="Preview">`;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Submit form
+    document.getElementById('trainerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append('name', document.getElementById('trainerName').value);
+        formData.append('surname', document.getElementById('trainerSurname').value);
+        formData.append('age', document.getElementById('trainerAge').value);
+        formData.append('yearsOfExperience', document.getElementById('trainerExperience').value);
+        formData.append('specialty', document.getElementById('trainerSpecialty').value);
+
+        const photoFile = document.getElementById('trainerPhoto').files[0];
+        if (photoFile) {
+            formData.append('photo', photoFile);
+        }
+
+        const adminToken = localStorage.getItem("adminToken");
+        const url = currentEditingId ? `/api/trainers/${currentEditingId}` : '/api/trainers';
+        const method = currentEditingId ? 'PUT' : 'POST';
+
+        try {
+            const response = await fetch(url, {
+                method,
+                headers: {
+                    'Authorization': `Bearer ${adminToken}`
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showMessage('Тренерот е зачуван успешно!', 'success');
+                document.getElementById('trainerForm').reset();
+                document.getElementById('photoPreview').innerHTML = '<p>Твоја слика ќе се прикажа овде</p>';
+                currentEditingId = null;
+                document.getElementById('formTitle').innerText = 'Додај тренер';
+                loadTrainers();
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showMessage(data.message || 'Грешка при зачувување', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showMessage('Грешка при зачувување на тренерот', 'error');
+        }
+    });
+
+    function editTrainer(id) {
+        fetch(`/api/trainers/${id}`)
+        .then(res => res.json())
+        .then(trainer => {
+            document.getElementById('trainerName').value = trainer.name;
+            document.getElementById('trainerSurname').value = trainer.surname;
+            document.getElementById('trainerAge').value = trainer.age;
+            document.getElementById('trainerExperience').value = trainer.yearsOfExperience;
+            document.getElementById('trainerSpecialty').value = trainer.specialty || '';
+            document.getElementById('photoPreview').innerHTML = `<img src="${trainer.photo}" alt="Preview">`;
+
+            currentEditingId = id;
+            document.getElementById('formTitle').innerText = 'Уреди тренер';
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        })
+        .catch(err => console.error('Error loading trainer:', err));
+    }
+
+    function deleteTrainer(id) {
+        if (!confirm('Дали сте сигурни дека сакате да го избришете овој тренер?')) return;
+
+        const adminToken = localStorage.getItem("adminToken");
+        fetch(`/api/trainers/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${adminToken}`
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            showMessage('Тренерот е избришан успешно!', 'success');
+            loadTrainers();
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            showMessage('Грешка при бришење на тренерот', 'error');
+        });
+    }
+
+    function showMessage(message, type) {
+        const messageDiv = document.getElementById('formMessage');
+        messageDiv.className = `message ${type}`;
+        messageDiv.innerText = message;
+        setTimeout(() => {
+            messageDiv.className = 'message';
+            messageDiv.innerText = '';
+        }, 3000);
+    }
+
+    function logoutAdmin() {
+        localStorage.removeItem("adminToken");
+        localStorage.removeItem("loggedUser");
+        window.location.href = "index.html";
+    }
+</script>
+
+</body>
+</html>
