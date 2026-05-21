@@ -43,13 +43,13 @@
 
     <span id="welcomeUser"></span>
 
-    <button id="loginBtn" onclick="openLogin()">Login</button>
+    <button id="loginBtn" onclick="openLogin()">Најави се</button>
 
     <button id="registerBtn" onclick="window.location.href='./register.html'">
-                Register
+                Регистрирај се
             </button>        
    
-    <button id="logoutBtn" onclick="logoutUser()" style="display:none;">Logout</button>
+    <button id="logoutBtn" onclick="logoutUser()" style="display:none;">Одјави се</button>
 </div>
     </nav>
 </header>
@@ -189,7 +189,7 @@ window.onload = () => {
         </select>
         <div style="display:flex;gap:10px;align-items:center;margin-top:10px;">
             <button onclick="addTestimonial()">Испрати</button>
-            <button onclick="window.location.href='testimonials.html'">Види сите мислења</button>
+            <button onclick="window.location.href='testimonials.html'" id="all-testimonials">Види сите мислења</button>
         </div>
     </div>
 
@@ -219,13 +219,14 @@ window.onload = () => {
 <footer class="footer" id="contact">
     <h2>ПЛАНЕТ ФИТНЕС</h2>
     <p>Битола, Македонија</p>
-    <p>070 810 596</p>
-    <p>planetfitnes@gmail.com</p>
+    <p>planetfitnes111@gmail.com</p>
     <p>Работно време: Пон-Пет 08:00-22:00, Саб 10:00-18:00, Нед 12:00-16:00</p>
     <div class="social-links">
-        <a href="https://www.facebook.com/planetfitnes" aria-label="Facebook" target="_blank"><img src="/uploads/facebook.png" alt="Facebook"></a>
-        <a href="https://www.instagram.com/planetfitnes" aria-label="Instagram" target="_blank"><img src="/uploads/instagram.png" alt="Instagram"></a>
-        <a href="https://twitter.com/planetfitnes" aria-label="Twitter" target="_blank"><img src="/uploads/twitter.png" alt="Twitter"></a>
+        <a href="https://www.facebook.com/planetfitness" aria-label="Facebook" target="_blank"><img src="/uploads/facebook.png" alt="Facebook"></a>
+        <a href="https://www.instagram.com/planettfitness.mk/?hl=en" aria-label="Instagram" target="_blank"><img src="/uploads/instagram.png" alt="Instagram"></a>
+        <a href="https://x.com/PlanetFitness" aria-label="Twitter" target="_blank"><img src="/uploads/twitter.png" alt="Twitter"></a>
+
+    <p style="margin-top: 20px; font-size: 14px; color: #aaa;">&copy; 2026 Планет Фитнес. Сите права задржани.</p>
 </footer>
 
 <button id="topBtn">⬆</button>

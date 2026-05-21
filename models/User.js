@@ -10,7 +10,8 @@ const userSchema = new mongoose.Schema({
     parking: { type: String, enum: ['Да', 'Не'], required: true },
     gymTime: { type: String, enum: ['Сабајле', 'Навечер'], required: true },
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
-    membersCount: { type: Number, default: 0 }
+    membersCount: { type: Number, default: 0 },
+    profilePicture: { type: String, default: null }
 });
 
 module.exports = mongoose.model("User", userSchema);

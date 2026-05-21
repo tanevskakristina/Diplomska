@@ -1,3 +1,10 @@
+// ================= LANGUAGE SWITCHER =================
+function switchLanguage() {
+    const currentLang = getCurrentLanguage();
+    const newLang = currentLang === 'en' ? 'mk' : 'en';
+    setLanguage(newLang);
+}
+
 document.addEventListener("DOMContentLoaded", function () {
 
     console.log("SCRIPT LOADED");
@@ -9,6 +16,7 @@ document.addEventListener("DOMContentLoaded", function () {
     loadTrainers();
     initChatWidget();
     initScrollAnimations();
+    translatePage();
 
     // ================= TOP BUTTON =================
     const topBtn = document.getElementById("topBtn");
@@ -344,6 +352,11 @@ function loginUser() {
             // Save logged user
             localStorage.setItem("loggedUser", JSON.stringify(data.user));
 
+            // Save profile picture if it exists
+            if (data.user.profilePicture) {
+                localStorage.setItem('userProfilePicture', data.user.profilePicture);
+            }
+
             // ADMIN LOGIN
             if (data.user && data.user.role === "admin") {
 
@@ -654,16 +667,40 @@ function uploadProfilePicture() {
         // Get current user
         let user = JSON.parse(localStorage.getItem('loggedUser'));
         if (user) {
-            // Save image to localStorage
-            localStorage.setItem('userProfilePicture', imageData);
-            
-            // Update avatar display
-            displayUserAvatar();
-            
-            // Close modal
-            closeProfilePicture();
-            
-            alert('Твоја слика е зачувана!');
+            // Save image to database
+            fetch('/api/users/upload-picture', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: user.id,
+                    profilePicture: imageData
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.user) {
+                    // Update localStorage with new picture
+                    localStorage.setItem('userProfilePicture', imageData);
+                    
+                    // Update the user object in localStorage with the picture
+                    user.profilePicture = imageData;
+                    localStorage.setItem('loggedUser', JSON.stringify(user));
+                    
+                    // Update avatar display
+                    displayUserAvatar();
+                    
+                    // Close modal
+                    closeProfilePicture();
+                    
+                    alert('Твоја слика е зачувана!');
+                } else {
+                    alert('Грешка при зачувување на сликата!');
+                }
+            })
+            .catch(error => {
+                console.error('Error uploading picture:', error);
+                alert('Грешка при зачувување на сликата!');
+            });
         }
     };
     reader.readAsDataURL(fileInput.files[0]);
@@ -680,7 +717,10 @@ function displayUserAvatar() {
             userAvatar.innerHTML = `<img src="${profilePicture}" alt="Profile">`;
         } else {
             let user = JSON.parse(localStorage.getItem('loggedUser'));
-            if (user) {
+            if (user && user.profilePicture) {
+                // Fallback to user object's profilePicture if localStorage key doesn't exist
+                userAvatar.innerHTML = `<img src="${user.profilePicture}" alt="Profile">`;
+            } else if (user) {
                 const names = user.name.split(" ");
                 const initials = names.map(n => n[0]).join("").toUpperCase().slice(0, 2);
                 userAvatar.innerHTML = `<span id="avatarInitials">${initials}</span>`;

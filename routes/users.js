@@ -66,7 +66,8 @@ router.post("/login", async (req, res) => {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                role: user.role
+                role: user.role,
+                profilePicture: user.profilePicture
             }
         });
     } catch (error) {
@@ -78,6 +79,38 @@ router.get("/members/count", async (req, res) => {
     try {
         const count = await User.countDocuments({ role: 'user' });
         res.json({ count });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Upload/Update profile picture
+router.post("/upload-picture", async (req, res) => {
+    try {
+        const { userId, profilePicture } = req.body;
+
+        if (!userId || !profilePicture) {
+            return res.status(400).json({ message: "User ID and profile picture are required" });
+        }
+
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { profilePicture },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.json({
+            message: "Profile picture saved successfully",
+            user: {
+                id: user._id,
+                name: user.name,
+                profilePicture: user.profilePicture
+            }
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
