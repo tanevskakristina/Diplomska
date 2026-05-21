@@ -228,22 +228,90 @@
             background: #ffb8a0;
         }
 
+        .tab-button {
+            background: #2a2a2a;
+            color: #fff;
+            border: 2px solid #ffd6c8;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .tab-button.active {
+            background: #ffd6c8;
+            color: #000;
+        }
+
+        .tab-button:hover {
+            background: #ffd6c8;
+            color: #000;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: grid;
+        }
+
+        .transformation-item {
+            background: #0a0a0a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #ffd6c8;
+        }
+
+        .transformation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .transformation-header h4 {
+            color: #ffd6c8;
+            margin: 0;
+        }
+
+        .transformation-photos {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 10px 0;
+        }
+
+        .transformation-photo {
+            border-radius: 6px;
+            overflow: hidden;
+            background: #0a0a0a;
+        }
+
+        .transformation-photo img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: contain;
+        }
+
+        .transformation-description {
+            color: #aaa;
+            font-size: 0.9em;
+            margin: 10px 0;
+        }
+
         @media (max-width: 768px) {
-            .admin-content {
+            .admin-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .transformation-photos {
                 grid-template-columns: 1fr;
-            }
-
-            .trainer-item {
-                flex-direction: column;
-            }
-
-            .trainer-actions {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            .trainer-actions button {
-                width: 100%;
             }
         }
     </style>
@@ -260,10 +328,14 @@
 <div class="admin-container">
     <div class="admin-header">
         <h1>Управување со тренери</h1>
-        <button onclick="logoutAdmin()" class="back-button">Logout</button>
+        <div>
+            <button onclick="switchSection('trainers')" class="tab-button active" id="trainersTab">Тренери</button>
+            <button onclick="switchSection('transformations')" class="tab-button" id="transformationsTab">Трансформации</button>
+            <button onclick="logoutAdmin()" class="back-button" style="margin-left: 10px;">Logout</button>
+        </div>
     </div>
 
-    <div class="admin-content">
+    <div class="admin-content" id="trainersSection">
         <!-- Form Section -->
         <div class="form-section">
             <h3 id="formTitle">Додај тренер</h3>
@@ -313,10 +385,53 @@
             <div id="trainersList"></div>
         </div>
     </div>
+
+    <!-- Transformations Section -->
+    <div class="admin-content section active" id="transformationsSection" style="display: grid;">
+        <div class="form-section">
+            <h3>Додај трансформација</h3>
+            <div id="transformationMessage"></div>
+
+            <form id="transformationForm">
+                <div class="form-group">
+                    <label for="transformationTrainer">Избери тренер</label>
+                    <select id="transformationTrainer" required style="width: 100%; padding: 10px; border: 1px solid #2a2a2a; border-radius: 6px; background: #0a0a0a; color: #fff;">
+                        <option value="">-- Избери тренер --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="transformationClientName">Име на клиент</label>
+                    <input type="text" id="transformationClientName" placeholder="Име на клиент" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="transformationDescription">Опис на трансформација</label>
+                    <textarea id="transformationDescription" placeholder="Опис на трансформацијата..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="transformationPhoto">Слика на трансформација</label>
+                    <input type="file" id="transformationPhoto" accept="image/*" required>
+                    <div class="photo-preview" id="transformationPhotoPreview">
+                        <p>Слика ќе се прикажа овде</p>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">Зачувај трансформација</button>
+            </form>
+        </div>
+
+        <div class="trainers-list">
+            <h3>Трансформации по тренер</h3>
+            <div id="transformationsList"></div>
+        </div>
+    </div>
 </div>
 
 <script>
     let currentEditingId = null;
+    let currentTrainerId = null;
 
     // Check if user is admin
     document.addEventListener('DOMContentLoaded', () => {
@@ -327,7 +442,37 @@
             return;
         }
         loadTrainers();
+        loadTransformationTrainers();
+        loadTransformations();
+        showSection('trainers');
     });
+
+    // Switch sections
+    function switchSection(section) {
+        // Hide all sections
+        document.getElementById('trainersSection').classList.remove('active');
+        document.getElementById('transformationsSection').classList.remove('active');
+        
+        // Deactivate all tabs
+        document.getElementById('trainersTab').classList.remove('active');
+        document.getElementById('transformationsTab').classList.remove('active');
+
+        // Show selected section
+        if (section === 'trainers') {
+            document.getElementById('trainersSection').classList.add('active');
+            document.getElementById('trainersTab').classList.add('active');
+            loadTrainers();
+        } else {
+            document.getElementById('transformationsSection').classList.add('active');
+            document.getElementById('transformationsTab').classList.add('active');
+            loadTransformationTrainers();
+            loadTransformations();
+        }
+    }
+
+    function showSection(section) {
+        switchSection(section);
+    }
 
     // Load trainers list
     function loadTrainers() {
@@ -361,6 +506,70 @@
         .catch(err => console.error('Error loading trainers:', err));
     }
 
+    // Load trainers dropdown for transformation form
+    function loadTransformationTrainers() {
+        fetch('/api/trainers')
+        .then(res => res.json())
+        .then(data => {
+            const select = document.getElementById('transformationTrainer');
+            const defaultOption = '<option value="">-- Избери тренер --</option>';
+            if (!data || data.length === 0) {
+                select.innerHTML = defaultOption;
+                return;
+            }
+
+            select.innerHTML = defaultOption + data.map(trainer => 
+                `<option value="${trainer._id}">${trainer.name} ${trainer.surname}</option>`
+            ).join('');
+        })
+        .catch(err => console.error('Error loading trainers:', err));
+    }
+
+    // Load transformations
+    function loadTransformations() {
+        fetch('/api/transformations')
+        .then(res => res.json())
+        .then(data => {
+            const list = document.getElementById('transformationsList');
+            if (!data || data.length === 0) {
+                list.innerHTML = '<p style="color: #aaa;">Сè уште нема додадено трансформации.</p>';
+                return;
+            }
+
+            // Group transformations by trainer
+            const grouped = {};
+            data.forEach(t => {
+                const trainerId = t.trainerId?._id || t.trainerId;
+                const trainerName = t.trainerId?.name ? `${t.trainerId.name} ${t.trainerId.surname}` : 'Непознат тренер';
+                if (!grouped[trainerId]) {
+                    grouped[trainerId] = { name: trainerName, transformations: [] };
+                }
+                grouped[trainerId].transformations.push(t);
+            });
+
+            list.innerHTML = Object.values(grouped).map(group => `
+                <div style="margin-bottom: 30px;">
+                    <h4 style="color: #ffd6c8; margin-bottom: 15px;">🏋️ ${group.name}</h4>
+                    ${group.transformations.map(t => `
+                        <div class="transformation-item">
+                            <div class="transformation-header">
+                                <div>
+                                    <h4>${t.clientName}</h4>
+                                </div>
+                                <button class="btn-delete" onclick="deleteTransformation('${t._id}')">Избриши</button>
+                            </div>
+                            <div class="transformation-photo">
+                                <img src="${t.photo}" alt="${t.clientName}">
+                            </div>
+                            <div class="transformation-description">${t.description}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('');
+        })
+        .catch(err => console.error('Error loading transformations:', err));
+    }
+
     // Handle photo preview
     document.getElementById('trainerPhoto').addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -373,7 +582,35 @@
         }
     });
 
-    // Submit form
+    // Handle before photo preview
+    if (document.getElementById('beforePhoto')) {
+        document.getElementById('beforePhoto').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    document.getElementById('beforePhotoPreview').innerHTML = `<img src="${event.target.result}" alt="Before">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // Handle after photo preview
+    if (document.getElementById('afterPhoto')) {
+        document.getElementById('afterPhoto').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    document.getElementById('afterPhotoPreview').innerHTML = `<img src="${event.target.result}" alt="After">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // Submit trainer form
     document.getElementById('trainerForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -411,6 +648,7 @@
                 currentEditingId = null;
                 document.getElementById('formTitle').innerText = 'Додај тренер';
                 loadTrainers();
+                loadTransformationTrainers();
                 setTimeout(() => location.reload(), 1500);
             } else {
                 showMessage(data.message || 'Грешка при зачувување', 'error');
@@ -418,6 +656,53 @@
         } catch (error) {
             console.error('Error:', error);
             showMessage('Грешка при зачувување на тренерот', 'error');
+        }
+    });
+
+    // Submit transformation form
+    document.getElementById('transformationForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const trainerId = document.getElementById('transformationTrainer').value;
+        const clientName = document.getElementById('transformationClientName').value;
+        const description = document.getElementById('transformationDescription').value;
+        const photoFile = document.getElementById('transformationPhoto').files[0];
+
+        if (!trainerId || !clientName || !description || !photoFile) {
+            showTransformationMessage('Пополнете ги сите полиња!', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('trainerId', trainerId);
+        formData.append('clientName', clientName);
+        formData.append('description', description);
+        formData.append('photo', photoFile);
+
+        const adminToken = localStorage.getItem("adminToken");
+
+        try {
+            const response = await fetch('/api/transformations', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${adminToken}`
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showTransformationMessage('Трансформацијата е зачувана успешно!', 'success');
+                document.getElementById('transformationForm').reset();
+                document.getElementById('transformationPhotoPreview').innerHTML = '<p>Слика ќе се прикажа овде</p>';
+                loadTransformations();
+            } else {
+                showTransformationMessage(data.message || 'Грешка при зачувување', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showTransformationMessage('Грешка при зачувување на трансформацијата', 'error');
         }
     });
 
@@ -454,6 +739,7 @@
         .then(data => {
             showMessage('Тренерот е избришан успешно!', 'success');
             loadTrainers();
+            loadTransformations();
         })
         .catch(err => {
             console.error('Error:', err);
@@ -461,8 +747,39 @@
         });
     }
 
+    function deleteTransformation(id) {
+        if (!confirm('Дали сте сигурни дека сакате да ја избришете оваа трансформација?')) return;
+
+        const adminToken = localStorage.getItem("adminToken");
+        fetch(`/api/transformations/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${adminToken}`
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            showTransformationMessage('Трансформацијата е избришана успешно!', 'success');
+            loadTransformations();
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            showTransformationMessage('Грешка при бришење на трансформацијата', 'error');
+        });
+    }
+
     function showMessage(message, type) {
         const messageDiv = document.getElementById('formMessage');
+        messageDiv.className = `message ${type}`;
+        messageDiv.innerText = message;
+        setTimeout(() => {
+            messageDiv.className = 'message';
+            messageDiv.innerText = '';
+        }, 3000);
+    }
+
+    function showTransformationMessage(message, type) {
+        const messageDiv = document.getElementById('transformationMessage');
         messageDiv.className = `message ${type}`;
         messageDiv.innerText = message;
         setTimeout(() => {

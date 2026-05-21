@@ -131,6 +131,16 @@ function loadTrainers() {
                 <h3>${trainer.name} ${trainer.surname}</h3>
                 <p>${trainer.specialty || 'Фитнес тренер'}</p>
             `;
+            div.style.cursor = "pointer";
+            div.addEventListener("click", () => {
+                openTrainer(
+                    `${trainer.name} ${trainer.surname}`,
+                    trainer.specialty || 'Фитнес тренер',
+                    `${trainer.name} ${trainer.surname} има ${trainer.yearsOfExperience} години искуство во областа на физичката подготовка.`,
+                    trainer.photo,
+                    trainer._id
+                );
+            });
             container.appendChild(div);
         });
 
@@ -455,7 +465,7 @@ function calculateBMI() {
 }
 }
 
-function openTrainer(name, type, bio, image) {
+function openTrainer(name, type, bio, image, trainerId) {
 
     document.getElementById("trainerName").innerText = name;
 
@@ -466,11 +476,49 @@ function openTrainer(name, type, bio, image) {
     document.getElementById("trainerImg").src = image;
 
     document.getElementById("trainerModal").style.display = "flex";
+
+    // Load and display transformations
+    if (trainerId) {
+        loadTrainerTransformations(trainerId);
+    }
 }
 
 function closeTrainer() {
     const modal = document.getElementById("trainerModal");
     if (modal) modal.style.display = "none";
+}
+
+// ================= TRAINER TRANSFORMATIONS =================
+function loadTrainerTransformations(trainerId) {
+    fetch(`/api/transformations/trainer/${trainerId}`)
+    .then(res => res.json())
+    .then(data => {
+        const transformationsContainer = document.getElementById("trainerTransformations");
+        if (!transformationsContainer) return;
+
+        if (!data || data.length === 0) {
+            transformationsContainer.innerHTML = '<p style="color: #aaa; text-align: center;">Сè уште нема додадено трансформации.</p>';
+            return;
+        }
+
+        transformationsContainer.innerHTML = '<h4 style="color: #ffd6c8; margin-top: 20px; margin-bottom: 15px;">📸 Трансформации</h4>' +
+            data.map(t => `
+                <div style="background: #0a0a0a; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #2a2a2a;">
+                    <h5 style="color: #ffd6c8; margin: 0 0 10px 0;">${t.clientName}</h5>
+                    <div style="border-radius: 6px; overflow: hidden; margin-bottom: 10px;">
+                        <img src="${t.photo}" alt="${t.clientName}" style="width: 100%; height: auto; display: block;">
+                    </div>
+                    <p style="color: #aaa; font-size: 0.9em; margin: 10px 0;">${t.description}</p>
+                </div>
+            `).join('');
+    })
+    .catch(err => {
+        console.error('Error loading transformations:', err);
+        const transformationsContainer = document.getElementById("trainerTransformations");
+        if (transformationsContainer) {
+            transformationsContainer.innerHTML = '<p style="color: #ff6b6b; text-align: center;">Грешка при вчитување на трансформации</p>';
+        }
+    });
 }
 
 // ================= MEMBERSHIP MODAL =================
