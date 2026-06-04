@@ -18,6 +18,17 @@ document.addEventListener("DOMContentLoaded", function () {
     initScrollAnimations();
     translatePage();
 
+    // Setup parking availability check on register page
+    const gymTimeRadios = document.querySelectorAll('input[name="gymTime"]');
+    if (gymTimeRadios.length > 0) {
+        gymTimeRadios.forEach(radio => {
+            radio.addEventListener('change', checkParkingAvailability);
+        });
+    }
+
+    // Setup trainer selection on register page - run after all other init
+    initTrainerSelection();
+
     // ================= TOP BUTTON =================
     const topBtn = document.getElementById("topBtn");
 
@@ -275,12 +286,62 @@ function registerUser() {
     const password = document.getElementById("regPassword").value;
     const parking = document.querySelector('input[name="parking"]:checked')?.value;
     const gymTime = document.querySelector('input[name="gymTime"]:checked')?.value;
+    const pricingPlan = document.querySelector('input[name="pricingPlan"]:checked')?.value;
+    const wantTrainer = document.querySelector('input[name="wantTrainer"]:checked')?.value;
+    const personalTrainer = document.getElementById("personalTrainer")?.value || null;
 
-    if (!name || !surname || !age || !address || !email || !password || !parking || !gymTime) {
+    if (!name || !surname || !age || !address || !email || !password || !parking || !gymTime || !pricingPlan || !wantTrainer) {
         document.getElementById("authMessage").innerText = "Пополнете ги сите полиња!";
         return;
     }
 
+    // If user needs parking, check availability
+    if (parking === 'Да') {
+        fetch('/api/users/parking/availability')
+            .then(res => res.json())
+            .then(data => {
+                const selectedSlot = gymTime === 'Сабајле' ? data.morning : data.evening;
+                const alternativeSlot = gymTime === 'Сабајле' ? data.evening : data.morning;
+                const alternativeTime = gymTime === 'Сабајле' ? 'Навечер' : 'Сабајле';
+
+                // If selected slot is full and alternative is available
+                if (selectedSlot.isFull && !alternativeSlot.isFull) {
+                    const message = `Паркингот за ${gymTime} е полн (10 места). Дали сакате да се пријавите за ${alternativeTime} наместо тоа?`;
+                    
+                    if (confirm(message)) {
+                        // User agreed to switch
+                        registerWithTime(name, surname, age, address, email, password, parking, alternativeTime, pricingPlan, wantTrainer === 'Да' ? personalTrainer : null);
+                    } else {
+                        // User wants to keep original time (might have to wait)
+                        registerWithTime(name, surname, age, address, email, password, parking, gymTime, pricingPlan, wantTrainer === 'Да' ? personalTrainer : null);
+                    }
+                } else if (selectedSlot.isFull && alternativeSlot.isFull) {
+                    // Both slots full - offer to register without parking
+                    const message = `Паркингот е полн за оба периода. Дали сакате да се пријавите без паркинг?`;
+                    
+                    if (confirm(message)) {
+                        // User agreed to register without parking
+                        registerWithTime(name, surname, age, address, email, password, 'Не', gymTime, pricingPlan, wantTrainer === 'Да' ? personalTrainer : null);
+                    } else {
+                        document.getElementById("authMessage").innerText = "Регистрацијата е отказана.";
+                    }
+                } else {
+                    // Selected slot is available
+                    registerWithTime(name, surname, age, address, email, password, parking, gymTime, pricingPlan, wantTrainer === 'Да' ? personalTrainer : null);
+                }
+            })
+            .catch(error => {
+                console.error('Error checking parking availability:', error);
+                // Continue with registration anyway
+                registerWithTime(name, surname, age, address, email, password, parking, gymTime, pricingPlan, wantTrainer === 'Да' ? personalTrainer : null);
+            });
+    } else {
+        // No parking needed, proceed directly
+        registerWithTime(name, surname, age, address, email, password, parking, gymTime, pricingPlan, wantTrainer === 'Да' ? personalTrainer : null);
+    }
+}
+
+function registerWithTime(name, surname, age, address, email, password, parking, gymTime, pricingPlan, personalTrainer) {
     const userData = {
         name,
         surname,
@@ -289,7 +350,9 @@ function registerUser() {
         email,
         password,
         parking,
-        gymTime
+        gymTime,
+        pricingPlan,
+        personalTrainer
     };
 
     fetch('/api/users/register', {
@@ -313,6 +376,11 @@ function registerUser() {
             document.getElementById("regPassword").value = "";
             document.querySelectorAll('input[name="parking"]').forEach(radio => radio.checked = false);
             document.querySelectorAll('input[name="gymTime"]').forEach(radio => radio.checked = false);
+            document.querySelectorAll('input[name="pricingPlan"]').forEach(radio => radio.checked = false);
+            document.querySelectorAll('input[name="wantTrainer"]').forEach(radio => radio.checked = false);
+            document.getElementById("personalTrainer").value = "";
+            document.getElementById("parkingWarning").style.display = "none";
+            document.getElementById("trainerSelect").style.display = "none";
         } else {
             document.getElementById("authMessage").innerText = data.message;
         }
@@ -321,6 +389,92 @@ function registerUser() {
         console.error('Error:', error);
         document.getElementById("authMessage").innerText = "Грешка при регистрација!";
     });
+}
+
+function checkParkingAvailability() {
+    const parking = document.querySelector('input[name="parking"]:checked')?.value;
+    const gymTime = document.querySelector('input[name="gymTime"]:checked')?.value;
+    const warningDiv = document.getElementById("parkingWarning");
+
+    if (parking !== 'Да' || !gymTime) {
+        warningDiv.style.display = "none";
+        return;
+    }
+
+    fetch('/api/users/parking/availability')
+        .then(res => res.json())
+        .then(data => {
+            const selectedSlot = gymTime === 'Сабајле' ? data.morning : data.evening;
+            const alternativeSlot = gymTime === 'Сабајле' ? data.evening : data.morning;
+            const alternativeTime = gymTime === 'Сабајле' ? 'Навечер' : 'Сабајле';
+
+            if (selectedSlot.isFull) {
+                if (!alternativeSlot.isFull) {
+                    warningDiv.innerText = `⚠️ Паркингот за ${gymTime} е полн. Препорачуваме ${alternativeTime}.`;
+                    warningDiv.style.display = "block";
+                } else {
+                    warningDiv.innerText = `⚠️ Паркингот е полн за оба периода!`;
+                    warningDiv.style.display = "block";
+                }
+            } else {
+                warningDiv.style.display = "none";
+            }
+        })
+        .catch(error => {
+            console.error('Error checking parking:', error);
+            warningDiv.style.display = "none";
+        });
+}
+
+function loadTrainersForRegistration() {
+    fetch('/api/trainers')
+        .then(res => res.json())
+        .then(data => {
+            const select = document.getElementById("personalTrainer");
+            if (!select || !data) return;
+
+            data.forEach(trainer => {
+                const option = document.createElement("option");
+                option.value = trainer._id;
+                option.text = `${trainer.name} ${trainer.surname}`;
+                select.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading trainers:', error);
+        });
+}
+
+function toggleTrainerSelect() {
+    const wantTrainer = document.querySelector('input[name="wantTrainer"]:checked')?.value;
+    const trainerSelectDiv = document.getElementById("trainerSelect");
+
+    if (wantTrainer === 'Да') {
+        trainerSelectDiv.style.display = "block";
+    } else {
+        trainerSelectDiv.style.display = "none";
+        document.getElementById("personalTrainer").value = "";
+    }
+}
+
+function initTrainerSelection() {
+    const wantTrainerRadios = document.querySelectorAll('input[name="wantTrainer"]');
+    if (wantTrainerRadios.length > 0) {
+        console.log("initTrainerSelection: Setting up for", wantTrainerRadios.length, "radios");
+        loadTrainersForRegistration();
+        
+        wantTrainerRadios.forEach(radio => {
+            // Remove any existing listeners first
+            const newRadio = radio.cloneNode(true);
+            radio.parentNode.replaceChild(newRadio, radio);
+            
+            // Add fresh listeners to the cloned element
+            const updatedRadio = document.querySelector(`input[name="wantTrainer"][value="${newRadio.value}"]`);
+            updatedRadio.addEventListener('click', toggleTrainerSelect);
+            updatedRadio.addEventListener('change', toggleTrainerSelect);
+            console.log("Added listeners to trainer radio:", updatedRadio.value);
+        });
+    }
 }
 
 function loginUser() {

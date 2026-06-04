@@ -6,7 +6,7 @@ const User = require("../models/User");
 
 router.post("/register", async (req, res) => {
     try {
-        const { name, surname, age, address, email, password, parking, gymTime } = req.body;
+        const { name, surname, age, address, email, password, parking, gymTime, pricingPlan, personalTrainer } = req.body;
 
         // Check if user already exists
         const existingUser = await User.findOne({ email });
@@ -27,6 +27,8 @@ router.post("/register", async (req, res) => {
             password: hashedPassword,
             parking,
             gymTime,
+            pricingPlan,
+            personalTrainer: personalTrainer || null,
             role: 'user'
         });
 
@@ -109,6 +111,40 @@ router.post("/upload-picture", async (req, res) => {
                 id: user._id,
                 name: user.name,
                 profilePicture: user.profilePicture
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Get parking availability for morning and evening
+router.get("/parking/availability", async (req, res) => {
+    try {
+        const PARKING_LIMIT = 10;
+        
+        const morningCount = await User.countDocuments({ 
+            gymTime: 'Сабајле', 
+            parking: 'Да',
+            role: 'user'
+        });
+        
+        const eveningCount = await User.countDocuments({ 
+            gymTime: 'Навечер', 
+            parking: 'Да',
+            role: 'user'
+        });
+        
+        res.json({
+            morning: {
+                count: morningCount,
+                isFull: morningCount >= PARKING_LIMIT,
+                available: Math.max(0, PARKING_LIMIT - morningCount)
+            },
+            evening: {
+                count: eveningCount,
+                isFull: eveningCount >= PARKING_LIMIT,
+                available: Math.max(0, PARKING_LIMIT - eveningCount)
             }
         });
     } catch (error) {

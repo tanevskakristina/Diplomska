@@ -78,6 +78,57 @@
             </div>
         </div>
 
+        <div class="radio-group">
+            <label>Избери план за членство</label>
+
+            <div class="radio-buttons">
+
+                <label>
+                    <input type="radio" name="pricingPlan" value="Basic">
+                    Basic
+                </label>
+
+                <label>
+                    <input type="radio" name="pricingPlan" value="Premium">
+                    Premium
+                </label>
+
+                <label>
+                    <input type="radio" name="pricingPlan" value="VIP">
+                    VIP
+                </label>
+
+            </div>
+        </div>
+
+        <div class="radio-group">
+            <label>Дали сакате личен тренер?</label>
+
+            <div class="radio-buttons">
+
+                <label>
+                    <input type="radio" name="wantTrainer" value="Да" onchange="toggleTrainerSelect()">
+                    Да
+                </label>
+
+                <label>
+                    <input type="radio" name="wantTrainer" value="Не" onchange="toggleTrainerSelect()">
+                    Не
+                </label>
+
+            </div>
+        </div>
+
+        <div id="trainerSelect" style="display:none; margin: 10px 0;">
+            <label for="personalTrainer">Избери тренер:</label>
+            <select id="personalTrainer" style="width: 100%; padding: 8px; border-radius: 4px;">
+                <option value="">Ниеден тренер</option>
+            </select>
+        </div>
+
+        <div id="parkingWarning" style="display:none; padding: 12px; margin: 10px 0; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; color: #856404; font-size: 14px;">
+        </div>
+
         <button onclick="registerUser()">Регистрирај се</button>
 
         <p id="authMessage"></p>
