@@ -157,7 +157,8 @@ function loadTrainers() {
                     trainer.specialty || 'Фитнес тренер',
                     `${trainer.name} ${trainer.surname} има ${trainer.yearsOfExperience} години искуство во областа на физичката подготовка.`,
                     trainer.photo,
-                    trainer._id
+                    trainer._id,
+                    trainer.availableAppointments || 0
                 );
             });
             container.appendChild(div);
@@ -289,10 +290,19 @@ function registerUser() {
     const pricingPlan = document.querySelector('input[name="pricingPlan"]:checked')?.value;
     const wantTrainer = document.querySelector('input[name="wantTrainer"]:checked')?.value;
     const personalTrainer = document.getElementById("personalTrainer")?.value || null;
+    const trainerAppointment = document.querySelector('input[name="trainerAppointment"]:checked')?.value || null;
 
     if (!name || !surname || !age || !address || !email || !password || !parking || !gymTime || !pricingPlan || !wantTrainer) {
         document.getElementById("authMessage").innerText = "Пополнете ги сите полиња!";
         return;
+    }
+
+    // If user selected a trainer, require appointment selection
+    if (wantTrainer === 'Да' && personalTrainer) {
+        if (!trainerAppointment) {
+            document.getElementById("authMessage").innerText = "Мора да изберете термин за тренерот!";
+            return;
+        }
     }
 
     // If user needs parking, check availability
@@ -310,10 +320,10 @@ function registerUser() {
                     
                     if (confirm(message)) {
                         // User agreed to switch
-                        registerWithTime(name, surname, age, address, email, password, parking, alternativeTime, pricingPlan, wantTrainer === 'Да' ? personalTrainer : null);
+                        registerWithTime(name, surname, age, address, email, password, parking, alternativeTime, pricingPlan, wantTrainer === 'Да' ? personalTrainer : null, trainerAppointment);
                     } else {
                         // User wants to keep original time (might have to wait)
-                        registerWithTime(name, surname, age, address, email, password, parking, gymTime, pricingPlan, wantTrainer === 'Да' ? personalTrainer : null);
+                        registerWithTime(name, surname, age, address, email, password, parking, gymTime, pricingPlan, wantTrainer === 'Да' ? personalTrainer : null, trainerAppointment);
                     }
                 } else if (selectedSlot.isFull && alternativeSlot.isFull) {
                     // Both slots full - offer to register without parking
@@ -321,27 +331,27 @@ function registerUser() {
                     
                     if (confirm(message)) {
                         // User agreed to register without parking
-                        registerWithTime(name, surname, age, address, email, password, 'Не', gymTime, pricingPlan, wantTrainer === 'Да' ? personalTrainer : null);
+                        registerWithTime(name, surname, age, address, email, password, 'Не', gymTime, pricingPlan, wantTrainer === 'Да' ? personalTrainer : null, trainerAppointment);
                     } else {
                         document.getElementById("authMessage").innerText = "Регистрацијата е отказана.";
                     }
                 } else {
                     // Selected slot is available
-                    registerWithTime(name, surname, age, address, email, password, parking, gymTime, pricingPlan, wantTrainer === 'Да' ? personalTrainer : null);
+                    registerWithTime(name, surname, age, address, email, password, parking, gymTime, pricingPlan, wantTrainer === 'Да' ? personalTrainer : null, trainerAppointment);
                 }
             })
             .catch(error => {
                 console.error('Error checking parking availability:', error);
                 // Continue with registration anyway
-                registerWithTime(name, surname, age, address, email, password, parking, gymTime, pricingPlan, wantTrainer === 'Да' ? personalTrainer : null);
+                registerWithTime(name, surname, age, address, email, password, parking, gymTime, pricingPlan, wantTrainer === 'Да' ? personalTrainer : null, trainerAppointment);
             });
     } else {
         // No parking needed, proceed directly
-        registerWithTime(name, surname, age, address, email, password, parking, gymTime, pricingPlan, wantTrainer === 'Да' ? personalTrainer : null);
+        registerWithTime(name, surname, age, address, email, password, parking, gymTime, pricingPlan, wantTrainer === 'Да' ? personalTrainer : null, trainerAppointment);
     }
 }
 
-function registerWithTime(name, surname, age, address, email, password, parking, gymTime, pricingPlan, personalTrainer) {
+function registerWithTime(name, surname, age, address, email, password, parking, gymTime, pricingPlan, personalTrainer, trainerAppointment) {
     const userData = {
         name,
         surname,
@@ -352,7 +362,8 @@ function registerWithTime(name, surname, age, address, email, password, parking,
         parking,
         gymTime,
         pricingPlan,
-        personalTrainer
+        personalTrainer,
+        trainerAppointment
     };
 
     fetch('/api/users/register', {
@@ -427,53 +438,238 @@ function checkParkingAvailability() {
 }
 
 function loadTrainersForRegistration() {
+    console.log("loadTrainersForRegistration: Starting to fetch trainers...");
+    
     fetch('/api/trainers')
-        .then(res => res.json())
+        .then(res => {
+            console.log("loadTrainersForRegistration: Response status:", res.status);
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            return res.json();
+        })
         .then(data => {
+            console.log("loadTrainersForRegistration: Received data:", data);
+            console.log("loadTrainersForRegistration: Is array?", Array.isArray(data));
+            
             const select = document.getElementById("personalTrainer");
-            if (!select || !data) return;
+            console.log("loadTrainersForRegistration: Select element found?", !!select);
+            
+            if (!select) {
+                console.error('loadTrainersForRegistration: personalTrainer select element not found');
+                return;
+            }
 
-            data.forEach(trainer => {
+            // Validate that data is an array
+            if (!Array.isArray(data)) {
+                console.error('loadTrainersForRegistration: API response is not an array:', data);
+                const noDataOption = document.createElement("option");
+                noDataOption.value = "";
+                noDataOption.text = "Грешка при вчитување на тренери";
+                noDataOption.disabled = true;
+                select.appendChild(noDataOption);
+                return;
+            }
+
+            if (data.length === 0) {
+                console.warn('loadTrainersForRegistration: No trainers returned from API');
+                const noTrainersOption = document.createElement("option");
+                noTrainersOption.value = "";
+                noTrainersOption.text = "Нема достапни тренери";
+                noTrainersOption.disabled = true;
+                select.appendChild(noTrainersOption);
+                return;
+            }
+
+            console.log(`loadTrainersForRegistration: Adding ${data.length} trainers to dropdown`);
+            
+            data.forEach((trainer, index) => {
+                console.log(`Adding trainer ${index + 1}: ${trainer.name} ${trainer.surname} (ID: ${trainer._id})`);
                 const option = document.createElement("option");
                 option.value = trainer._id;
                 option.text = `${trainer.name} ${trainer.surname}`;
                 select.appendChild(option);
             });
+
+            console.log(`loadTrainersForRegistration: Successfully added ${data.length} trainers`);
         })
         .catch(error => {
-            console.error('Error loading trainers:', error);
+            console.error('loadTrainersForRegistration: Error loading trainers:', error);
+            const select = document.getElementById("personalTrainer");
+            if (select) {
+                const errorOption = document.createElement("option");
+                errorOption.value = "";
+                errorOption.text = "Грешка при вчитување на тренери";
+                errorOption.disabled = true;
+                select.appendChild(errorOption);
+            }
         });
 }
 
 function toggleTrainerSelect() {
     const wantTrainer = document.querySelector('input[name="wantTrainer"]:checked')?.value;
     const trainerSelectDiv = document.getElementById("trainerSelect");
+    const appointmentSelectDiv = document.getElementById("appointmentSelect");
+    const select = document.getElementById("personalTrainer");
+
+    console.log("toggleTrainerSelect: wantTrainer value:", wantTrainer);
+    console.log("toggleTrainerSelect: trainerSelectDiv found?", !!trainerSelectDiv);
 
     if (wantTrainer === 'Да') {
+        console.log("toggleTrainerSelect: Showing trainer select");
         trainerSelectDiv.style.display = "block";
+        
+        // Check if trainers are already loaded (more than just the default option)
+        if (select && select.options.length <= 1) {
+            console.log("toggleTrainerSelect: Trainers not yet loaded, loading now...");
+            loadTrainersForRegistration();
+        }
     } else {
+        console.log("toggleTrainerSelect: Hiding trainer select");
         trainerSelectDiv.style.display = "none";
-        document.getElementById("personalTrainer").value = "";
+        appointmentSelectDiv.style.display = "none";
+        if (select) {
+            select.value = "";
+        }
     }
+}
+
+function loadTrainerAppointments() {
+    const trainerId = document.getElementById("personalTrainer").value;
+    const appointmentSelectDiv = document.getElementById("appointmentSelect");
+    const appointmentsList = document.getElementById("appointmentsList");
+    const noAppointmentsMessage = document.getElementById("noAppointmentsMessage");
+
+    console.log("loadTrainerAppointments: trainerId:", trainerId);
+
+    if (!trainerId) {
+        appointmentSelectDiv.style.display = "none";
+        return;
+    }
+
+    // Fetch trainer data to get appointments
+    fetch(`/api/trainers/${trainerId}`)
+        .then(res => res.json())
+        .then(trainer => {
+            console.log("loadTrainerAppointments: trainer data:", trainer);
+
+            if (!trainer.availableAppointments || trainer.availableAppointments.trim() === "") {
+                console.log("loadTrainerAppointments: No appointments for this trainer");
+                noAppointmentsMessage.style.display = "block";
+                appointmentsList.innerHTML = "";
+                appointmentSelectDiv.style.display = "block";
+                return;
+            }
+
+            // Parse appointments (comma-separated)
+            const appointments = trainer.availableAppointments.split(',').map(apt => apt.trim()).filter(apt => apt);
+            console.log("loadTrainerAppointments: parsed appointments:", appointments);
+
+            appointmentsList.innerHTML = "";
+            let availableCount = 0;
+
+            // Check availability for each appointment
+            Promise.all(appointments.map(aptTime =>
+                fetch(`/api/trainers/appointments/bookings/${trainerId}/${aptTime}`)
+                    .then(res => res.json())
+                    .catch(err => {
+                        console.error('Error checking appointment:', err);
+                        return { bookingsCount: 0, isFull: false };
+                    })
+            )).then(results => {
+                results.forEach((result, index) => {
+                    const aptTime = appointments[index];
+                    const bookingsCount = result.bookingsCount || 0;
+                    const isFull = bookingsCount >= 5;
+
+                    if (!isFull) {
+                        availableCount++;
+                    }
+
+                    const appointmentDiv = document.createElement("div");
+                    appointmentDiv.style.cssText = `
+                        padding: 10px;
+                        background: ${isFull ? '#3a2a2a' : '#0a0a0a'};
+                        border: 1px solid ${isFull ? '#6a4a4a' : '#2a2a2a'};
+                        border-radius: 4px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        cursor: ${isFull ? 'not-allowed' : 'pointer'};
+                        opacity: ${isFull ? '0.6' : '1'};
+                    `;
+
+                    const label = document.createElement("label");
+                    label.style.cssText = `
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        cursor: ${isFull ? 'not-allowed' : 'pointer'};
+                        width: 100%;
+                        margin: 0;
+                    `;
+
+                    const input = document.createElement("input");
+                    input.type = "radio";
+                    input.name = "trainerAppointment";
+                    input.value = aptTime;
+                    input.disabled = isFull;
+                    input.style.cursor = isFull ? 'not-allowed' : 'pointer';
+
+                    const textSpan = document.createElement("span");
+                    textSpan.textContent = `${aptTime}`;
+                    textSpan.style.color = isFull ? '#999' : '#fff';
+
+                    const statusSpan = document.createElement("span");
+                    statusSpan.textContent = isFull ? '(Полно - 5/5)' : `(${bookingsCount}/5)`;
+                    statusSpan.style.cssText = `
+                        margin-left: auto;
+                        font-size: 0.9em;
+                        color: ${isFull ? '#ff6b6b' : '#90ee90'};
+                    `;
+
+                    label.appendChild(input);
+                    label.appendChild(textSpan);
+                    appointmentDiv.appendChild(label);
+                    appointmentDiv.appendChild(statusSpan);
+                    appointmentsList.appendChild(appointmentDiv);
+                });
+
+                if (availableCount === 0) {
+                    noAppointmentsMessage.style.display = "block";
+                    appointmentsList.innerHTML = "";
+                } else {
+                    noAppointmentsMessage.style.display = "none";
+                }
+
+                appointmentSelectDiv.style.display = "block";
+            });
+        })
+        .catch(error => {
+            console.error('Error loading trainer appointments:', error);
+            appointmentsList.innerHTML = '<p style="color: #ff6b6b;">Грешка при вчитување на термини</p>';
+            appointmentSelectDiv.style.display = "block";
+        });
 }
 
 function initTrainerSelection() {
     const wantTrainerRadios = document.querySelectorAll('input[name="wantTrainer"]');
     if (wantTrainerRadios.length > 0) {
         console.log("initTrainerSelection: Setting up for", wantTrainerRadios.length, "radios");
+        
+        // Load trainers data when page loads
         loadTrainersForRegistration();
         
+        // Add change listeners to radios (in addition to inline onchange)
         wantTrainerRadios.forEach(radio => {
-            // Remove any existing listeners first
-            const newRadio = radio.cloneNode(true);
-            radio.parentNode.replaceChild(newRadio, radio);
-            
-            // Add fresh listeners to the cloned element
-            const updatedRadio = document.querySelector(`input[name="wantTrainer"][value="${newRadio.value}"]`);
-            updatedRadio.addEventListener('click', toggleTrainerSelect);
-            updatedRadio.addEventListener('change', toggleTrainerSelect);
-            console.log("Added listeners to trainer radio:", updatedRadio.value);
+            radio.addEventListener('change', toggleTrainerSelect);
+            console.log("Added change listener to trainer radio:", radio.value);
         });
+        
+        // Ensure toggleTrainerSelect is called on page load to set initial state
+        toggleTrainerSelect();
+    } else {
+        console.warn("initTrainerSelection: No wantTrainer radios found in the DOM");
     }
 }
 
@@ -632,7 +828,7 @@ function calculateBMI() {
 }
 }
 
-function openTrainer(name, type, bio, image, trainerId) {
+function openTrainer(name, type, bio, image, trainerId, availableAppointments) {
 
     document.getElementById("trainerName").innerText = name;
 
@@ -641,6 +837,14 @@ function openTrainer(name, type, bio, image, trainerId) {
     document.getElementById("trainerBio").innerText = bio;
 
     document.getElementById("trainerImg").src = image;
+
+    // Display available appointments
+    const appointmentsElement = document.getElementById("trainerAppointments");
+    if (availableAppointments && availableAppointments.trim() !== "") {
+        appointmentsElement.innerText = `📅 Достапни термини: ${availableAppointments}`;
+    } else {
+        appointmentsElement.innerText = "📅 Достапни термини: Нема слободни термини";
+    }
 
     document.getElementById("trainerModal").style.display = "flex";
 

@@ -154,6 +154,8 @@
 
         <p id="trainerBio"></p>
 
+        <p id="trainerAppointments" style="color: #ffd6c8; font-weight: bold; margin: 15px 0;"></p>
+
         <div id="trainerTransformations"></div>
 
     </div>
@@ -177,7 +179,7 @@
             }
 
             grid.innerHTML = data.map(trainer => `
-                <div class="trainer-card" onclick="openTrainer('${trainer.name} ${trainer.surname}', '${trainer.specialty || 'Фитнес тренер'}', '${trainer.name} ${trainer.surname} има ${trainer.yearsOfExperience} години искуство во областа на физичката подготовка.', '${trainer.photo}', '${trainer._id}')">
+                <div class="trainer-card" onclick="openTrainer('${trainer.name} ${trainer.surname}', '${trainer.specialty || 'Фитнес тренер'}', '${trainer.name} ${trainer.surname} има ${trainer.yearsOfExperience} години искуство во областа на физичката подготовка.', '${trainer.photo}', '${trainer._id}', '${trainer.availableAppointments || ''}')">
                     <div class="trainer-card-image">
                         <img src="${trainer.photo}" alt="${trainer.name}">
                     </div>
@@ -186,6 +188,7 @@
                         <p>Години: ${trainer.age}</p>
                         <p>Искуство: ${trainer.yearsOfExperience} години</p>
                         ${trainer.specialty ? `<div class="trainer-specialty">${trainer.specialty}</div>` : ''}
+                        ${trainer.availableAppointments ? `<p style="color: #ffd6c8; margin-top: 10px;">📅 Термини: ${trainer.availableAppointments}</p>` : ''}
                     </div>
                 </div>
             `).join('');
@@ -196,11 +199,20 @@
         });
     }
 
-    function openTrainer(name, type, bio, image, trainerId) {
+    function openTrainer(name, type, bio, image, trainerId, availableAppointments) {
         document.getElementById("trainerName").innerText = name;
         document.getElementById("trainerType").innerText = type;
         document.getElementById("trainerBio").innerText = bio;
         document.getElementById("trainerImg").src = image;
+
+        // Display available appointments
+        const appointmentsElement = document.getElementById("trainerAppointments");
+        if (availableAppointments && availableAppointments.trim() !== "") {
+            appointmentsElement.innerText = `📅 Достапни термини: ${availableAppointments}`;
+        } else {
+            appointmentsElement.innerText = "📅 Достапни термини: Нема слободни термини";
+        }
+
         document.getElementById("trainerModal").style.display = "flex";
 
         // Load and display transformations

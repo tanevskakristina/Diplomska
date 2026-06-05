@@ -118,28 +118,6 @@ window.onload = () => {
 
 <!-- MODAL -->
 
-
-<section class="trainers" id="trainers">
-    <h2>Тренери</h2>
-<div class="trainer-container">
-    <p style="text-align: center; color: #aaa;">Вчитување на тренери...</p>
-</div>
-</section>
-<!-- BMI -->
-<section class="bmi" id="calculator">
-    <h2> BMI Калкулатор</h2>
-
-    <div class="bmi-box">
-        <input type="number" id="height" placeholder="Висина (cm)">
-        <input type="number" id="weight" placeholder="Тежина (kg)">
-        <br/><br/>
-        <button onclick="calculateBMI()">Пресметај</button>
-        <h3 id="bmiResult"></h3>
-        <p id="bmiCategory"></p>
-    </div>
-</section>
-
-<!-- PRICING -->
 <section class="pricing" id="pricing">
     <h2> Членарини</h2>
 
@@ -168,6 +146,31 @@ window.onload = () => {
 
     </div>
 </section>
+
+
+
+<section class="trainers" id="trainers">
+    <h2>Тренери</h2>
+<div class="trainer-container">
+    <p style="text-align: center; color: #aaa;">Вчитување на тренери...</p>
+</div>
+</section>
+<!-- BMI -->
+<section class="bmi" id="calculator">
+    <h2> BMI Калкулатор</h2>
+
+    <div class="bmi-box">
+        <input type="number" id="height" placeholder="Висина (cm)">
+        <input type="number" id="weight" placeholder="Тежина (kg)">
+        <br/><br/>
+        <button onclick="calculateBMI()">Пресметај</button>
+        <h3 id="bmiResult"></h3>
+        <p id="bmiCategory"></p>
+    </div>
+</section>
+
+
+
 
 <!-- TESTIMONIALS -->
 <section class="testimonials" id="testimonials">
@@ -264,6 +267,8 @@ window.onload = () => {
         <h4 id="trainerType"></h4>
 
         <p id="trainerBio"></p>
+
+        <p id="trainerAppointments" style="color: #ffd6c8; font-weight: bold; margin: 15px 0;"></p>
 
         <div id="trainerTransformations"></div>
 

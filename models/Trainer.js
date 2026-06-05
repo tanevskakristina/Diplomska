@@ -7,6 +7,7 @@ const trainerSchema = new mongoose.Schema({
     yearsOfExperience: { type: Number, required: true },
     photo: { type: String, required: true }, // URL or file path
     specialty: { type: String, default: "" }, // Optional specialty
+    availableAppointments: { type: String, default: "" }, // Timestamps/appointment slots
     createdAt: { type: Date, default: Date.now }
 });
 

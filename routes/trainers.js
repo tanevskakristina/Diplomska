@@ -71,7 +71,7 @@ router.get("/:id", async (req, res) => {
 // Add trainer (admin only)
 router.post("/", adminAuth, upload.single("photo"), async (req, res) => {
     try {
-        const { name, surname, age, yearsOfExperience, specialty } = req.body;
+        const { name, surname, age, yearsOfExperience, specialty, availableAppointments } = req.body;
 
         if (!name || !surname || !age || !yearsOfExperience) {
             return res.status(400).json({ message: "Missing required fields" });
@@ -85,7 +85,8 @@ router.post("/", adminAuth, upload.single("photo"), async (req, res) => {
             age: parseInt(age),
             yearsOfExperience: parseInt(yearsOfExperience),
             photo,
-            specialty: specialty || ""
+            specialty: specialty || "",
+            availableAppointments: availableAppointments || ""
         });
 
         await trainer.save();
@@ -102,14 +103,15 @@ router.post("/", adminAuth, upload.single("photo"), async (req, res) => {
 // Update trainer (admin only)
 router.put("/:id", adminAuth, upload.single("photo"), async (req, res) => {
     try {
-        const { name, surname, age, yearsOfExperience, specialty } = req.body;
+        const { name, surname, age, yearsOfExperience, specialty, availableAppointments } = req.body;
 
         const updateData = {
             name,
             surname,
             age: parseInt(age),
             yearsOfExperience: parseInt(yearsOfExperience),
-            specialty: specialty || ""
+            specialty: specialty || "",
+            availableAppointments: availableAppointments || ""
         };
 
         if (req.file) {
@@ -141,6 +143,28 @@ router.delete("/:id", adminAuth, async (req, res) => {
         }
 
         res.json({ message: "Trainer deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Get appointment bookings count
+router.get("/appointments/bookings/:trainerId/:appointmentTime", async (req, res) => {
+    try {
+        const User = require("../models/User");
+        const { trainerId, appointmentTime } = req.params;
+        
+        const bookingsCount = await User.countDocuments({
+            personalTrainer: trainerId,
+            trainerAppointment: appointmentTime
+        });
+        
+        res.json({ 
+            trainerId,
+            appointmentTime,
+            bookingsCount,
+            isFull: bookingsCount >= 5
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

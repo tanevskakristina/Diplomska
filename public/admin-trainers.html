@@ -368,6 +368,11 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="trainerAppointments">Достапни термини (timestamps)</label>
+                    <input type="text" id="trainerAppointments" placeholder="Н.пр. 10:00, 14:30, 16:00" value="">
+                </div>
+
+                <div class="form-group">
                     <label for="trainerPhoto">Слика</label>
                     <input type="file" id="trainerPhoto" accept="image/*" required>
                     <div class="photo-preview" id="photoPreview">
@@ -495,6 +500,7 @@
                         <p>Години: ${trainer.age}</p>
                         <p>Искуство: ${trainer.yearsOfExperience} години</p>
                         ${trainer.specialty ? `<p>Специјалност: ${trainer.specialty}</p>` : ''}
+                        ${trainer.availableAppointments ? `<p>Достапни термини: <strong>${trainer.availableAppointments}</strong></p>` : ''}
                     </div>
                     <div class="trainer-actions">
                         <button class="btn-edit" onclick="editTrainer('${trainer._id}')">Уреди</button>
@@ -620,6 +626,7 @@
         formData.append('age', document.getElementById('trainerAge').value);
         formData.append('yearsOfExperience', document.getElementById('trainerExperience').value);
         formData.append('specialty', document.getElementById('trainerSpecialty').value);
+        formData.append('availableAppointments', document.getElementById('trainerAppointments').value);
 
         const photoFile = document.getElementById('trainerPhoto').files[0];
         if (photoFile) {
@@ -715,6 +722,7 @@
             document.getElementById('trainerAge').value = trainer.age;
             document.getElementById('trainerExperience').value = trainer.yearsOfExperience;
             document.getElementById('trainerSpecialty').value = trainer.specialty || '';
+            document.getElementById('trainerAppointments').value = trainer.availableAppointments || '';
             document.getElementById('photoPreview').innerHTML = `<img src="${trainer.photo}" alt="Preview">`;
 
             currentEditingId = id;

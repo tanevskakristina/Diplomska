@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema({
     gymTime: { type: String, enum: ['Сабајле', 'Навечер'], required: true },
     pricingPlan: { type: String, enum: ['Basic', 'Premium', 'VIP'], required: true },
     personalTrainer: { type: mongoose.Schema.Types.ObjectId, ref: 'Trainer', default: null },
+    trainerAppointment: { type: String, default: null }, // Selected appointment time
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
     membersCount: { type: Number, default: 0 },
     profilePicture: { type: String, default: null }
