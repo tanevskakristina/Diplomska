@@ -1556,3 +1556,64 @@ html{
     font-size: 16px;
     width: 100%;
 }
+
+.profile-picture-card{
+    text-align:center;
+}
+
+.profile-image{
+    width:150px;
+    height:150px;
+    object-fit:cover;
+    border-radius:50%;
+    border:4px solid #ffd6c8;
+    margin-bottom:15px;
+}
+
+.profile-row{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    margin-bottom:15px;
+}
+
+.profile-row label{
+    color:#ffd6c8;
+    font-weight:bold;
+}
+
+.profile-row select{
+    padding:12px;
+    border-radius:10px;
+    border:1px solid #444;
+    background:#1c1c1c;
+    color:white;
+    font-size:15px;
+    cursor:pointer;
+}
+
+.profile-row select:focus{
+    outline:none;
+    border-color:#ffd6c8;
+}
+
+.profile-btn{
+    padding:12px 20px;
+    border:none;
+    border-radius:10px;
+    background:#ffd6c8;
+    color:black;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.profile-btn:hover{
+    transform:translateY(-2px);
+}
+
+#profilePictureInput{
+    display:block;
+    margin:10px auto;
+    color:white;
+}

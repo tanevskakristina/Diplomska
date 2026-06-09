@@ -1030,7 +1030,7 @@ function uploadProfilePicture() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    userId: user.id,
+                    userId: user._id,
                     profilePicture: imageData
                 })
             })
@@ -1092,8 +1092,11 @@ function displayUserAvatar() {
 // Add click handler to avatar to open profile picture modal
 document.addEventListener('DOMContentLoaded', () => {
     const userAvatar = document.getElementById('userAvatar');
+
     if (userAvatar) {
-        userAvatar.addEventListener('click', openProfilePicture);
+        userAvatar.addEventListener('click', () => {
+            window.location.href = "profile.html";
+        });
     }
 });
 

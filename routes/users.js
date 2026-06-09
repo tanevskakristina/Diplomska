@@ -65,13 +65,19 @@ router.post("/login", async (req, res) => {
         res.json({
             message: "Login successful",
             token,
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                profilePicture: user.profilePicture
-            }
+           user: {
+        _id: user._id,
+        name: user.name,
+        surname: user.surname,
+        age: user.age,
+        address: user.address,
+        email: user.email,
+        pricingPlan: user.pricingPlan,
+        personalTrainer: user.personalTrainer,
+        trainerAppointment: user.trainerAppointment,
+        role: user.role,
+        profilePicture: user.profilePicture
+}
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -148,6 +154,86 @@ router.get("/parking/availability", async (req, res) => {
                 available: Math.max(0, PARKING_LIMIT - eveningCount)
             }
         });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+router.get("/profile/:id", async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id)
+            .populate("personalTrainer");
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        });
+    }
+});
+
+router.put("/cancel-membership/:id", async (req, res) => {
+    try {
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            {
+                pricingPlan: "Basic",
+                personalTrainer: null,
+                trainerAppointment: null
+            },
+            { new: true }
+        );
+
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        });
+    }
+});
+
+// UPDATE USER (plan / trainer / appointment / profile edits)
+router.put("/update/:id", async (req, res) => {
+    try {
+        const {
+            pricingPlan,
+            personalTrainer,
+            trainerAppointment,
+            name,
+            surname,
+            age,
+            address
+        } = req.body;
+
+        const updatedUser = await User.findByIdAndUpdate(
+            req.params.id,
+            {
+                pricingPlan,
+                personalTrainer,
+                trainerAppointment,
+                name,
+                surname,
+                age,
+                address
+            },
+            { new: true }
+        ).populate("personalTrainer");
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.json({
+            message: "Profile updated successfully",
+            user: updatedUser
+        });
+
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

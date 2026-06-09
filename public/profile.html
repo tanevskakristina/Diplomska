@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="mk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мој Профил</title>
+
+<link rel="stylesheet" href="style.css">
+
+<style>
+.profile-container{
+    max-width:900px;
+    margin:40px auto;
+    padding:20px;
+}
+
+.profile-card{
+    background:#111;
+    border:1px solid #333;
+    border-radius:12px;
+    padding:20px;
+    margin-bottom:20px;
+}
+
+.profile-card h2{
+    color:#ffd6c8;
+    margin-bottom:15px;
+}
+
+.profile-row{
+    margin:10px 0;
+}
+
+.profile-actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.profile-btn{
+    padding:10px 20px;
+    cursor:pointer;
+}
+
+.cancel-btn{
+    background:#c62828;
+    color:white;
+    border:none;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <nav class="navbar">
+
+        <h2 class="logo">ПЛАНЕТ ФИТНЕС</h2>
+
+        <div class="nav-buttons">
+            <button onclick="window.location.href='./index.html'">
+                Почетна
+            </button>
+        </div>
+
+    </nav>  
+</header>  
+
+<div class="profile-container">
+
+    <div class="profile-card profile-picture-card">
+
+    <img
+        id="profileImage"
+        src="https://via.placeholder.com/150"
+        alt="Profile Picture"
+        class="profile-image"
+    >
+
+    <input
+        type="file"
+        id="profilePictureInput"
+        accept="image/*"
+    >
+
+    <button id="uploadPictureBtn" class="profile-btn">
+        Прикачи слика
+    </button>
+
+</div>
+    <div class="profile-card">
+        <h2>Кориснички Информации</h2>
+
+        <div class="profile-row">
+            <strong>Име:</strong>
+            <span id="name"></span>
+        </div>
+
+        <div class="profile-row">
+            <strong>Презиме:</strong>
+            <span id="surname"></span>
+        </div>
+
+        <div class="profile-row">
+            <strong>Email:</strong>
+            <span id="email"></span>
+        </div>
+
+        <div class="profile-row">
+            <strong>Возраст:</strong>
+            <span id="age"></span>
+        </div>
+
+        <div class="profile-row">
+            <strong>Адреса:</strong>
+            <span id="address"></span>
+        </div>
+    </div>
+
+    <div class="profile-card">
+        <h2>Тековно Членство</h2>
+
+        <div class="profile-row">
+            <strong>Пакет:</strong>
+            <span id="pricingPlan"></span>
+        </div>
+
+        <div class="profile-row">
+            <strong>Тренер:</strong>
+            <span id="trainer"></span>
+        </div>
+
+        <div class="profile-row">
+            <strong>Термин:</strong>
+            <span id="appointment"></span>
+        </div>
+    </div>
+
+    <div class="profile-card">
+
+        <h2>Membership Settings</h2>
+
+        <div class="profile-row">
+            <label>Пакет</label>
+
+            <select id="planSelect">
+                <option value="Basic">Basic</option>
+                <option value="Premium">Premium</option>
+                <option value="VIP">VIP</option>
+            </select>
+        </div>
+
+        <div class="profile-row">
+            <label>Тренер</label>
+
+            <select id="trainerSelectProfile">
+                <option value="">Тренер</option>
+            </select>
+        </div>
+
+        <div class="profile-row">
+            <label>Термин</label>
+
+            <select id="appointmentSelectProfile">
+                <option value="">Одбери термин</option>
+            </select>
+        </div>
+
+        <div class="profile-actions">
+
+            <button id="saveChangesBtn" class="profile-btn">
+                Зачувај Промени
+            </button>
+
+            <button id="cancelMembershipBtn" class="profile-btn cancel-btn">
+                Откажи Членство
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+<script src="profile.js"></script>
+
+</body>
+</html>
