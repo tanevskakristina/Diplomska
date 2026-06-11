@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="mk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <nav class="navbar">
+        <h2 class="logo">ПЛАНЕТ ФИТНЕС SHOP</h2>
+
+        <div class="nav-buttons">
+            <button onclick="window.location.href='./index.html'">Почетна</button>
+            <button onclick="window.location.href='./shop.html'">Продавница</button>
+        </div>
+    </nav>
+</header>
+
+<section class="shop-page cart-page">
+    <h1>Кошничка</h1>
+    <p id="cartAccessMessage" class="empty-message"></p>
+
+    <div id="cartContent" class="cart-layout">
+        <div>
+            <div id="cartItems" class="cart-items"></div>
+        </div>
+
+        <aside class="cart-summary">
+            <h2>Нарачка</h2>
+            <p class="cart-total">Вкупно: <span id="cartTotal">0</span> ден</p>
+            <p>Плаќање при достава</p>
+
+            <input type="text" id="customerName" placeholder="Име и презиме">
+            <input type="email" id="customerEmail" placeholder="Email адреса">
+            <input type="text" id="customerAddress" placeholder="Адреса за достава">
+            <input type="text" id="customerPhone" placeholder="Телефон">
+
+            <button id="checkoutBtn" onclick="finishCartOrder()">Потврди нарачка</button>
+            <button class="secondary-button" onclick="clearCart()">Исчисти кошничка</button>
+            <p id="cartMessage"></p>
+        </aside>
+    </div>
+</section>
+
+<script>
+const cartStorageKey = "shoppingCart";
+
+function getCartItems() {
+    return JSON.parse(localStorage.getItem(cartStorageKey) || "[]");
+}
+
+function saveCartItems(items) {
+    localStorage.setItem(cartStorageKey, JSON.stringify(items));
+    renderCart();
+}
+
+function checkCartAccess() {
+    const token = localStorage.getItem("token");
+    const adminToken = localStorage.getItem("adminToken");
+    const messageEl = document.getElementById("cartAccessMessage");
+    const contentEl = document.getElementById("cartContent");
+
+    if (adminToken) {
+        messageEl.innerText = "The shopping cart is available only for regular users.";
+        contentEl.style.display = "none";
+        return false;
+    }
+
+    if (!token) {
+        messageEl.innerText = "Please log in as a regular user to use the shopping cart.";
+        contentEl.style.display = "none";
+        return false;
+    }
+
+    messageEl.innerText = "";
+    contentEl.style.display = "grid";
+    return true;
+}
+
+function renderCart() {
+    if (!checkCartAccess()) return;
+
+    const cartItems = getCartItems();
+    const itemsEl = document.getElementById("cartItems");
+    const totalEl = document.getElementById("cartTotal");
+    const checkoutBtn = document.getElementById("checkoutBtn");
+
+    if (cartItems.length === 0) {
+        itemsEl.innerHTML = `<p class="empty-message">Вашата кошничка е празна.</p>`;
+        totalEl.innerText = "0";
+        checkoutBtn.disabled = true;
+        return;
+    }
+
+    checkoutBtn.disabled = false;
+    totalEl.innerText = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+    itemsEl.innerHTML = cartItems.map(item => `
+        <div class="cart-item">
+            <img src="${item.image}" alt="${item.name}">
+            <div class="cart-item-info">
+                <h3>${item.name}</h3>
+                <p>${item.category}</p>
+                <p class="product-price">${item.price} den</p>
+            </div>
+            <div class="cart-quantity">
+                <button onclick="changeQuantity('${item._id}', -1)">-</button>
+                <span>${item.quantity}</span>
+                <button onclick="changeQuantity('${item._id}', 1)">+</button>
+            </div>
+            <button class="remove-cart-item" onclick="removeFromCart('${item._id}')">Отстрани од кошничка</button>
+        </div>
+    `).join("");
+}
+
+function changeQuantity(productId, amount) {
+    const cartItems = getCartItems()
+        .map(item => item._id === productId ? { ...item, quantity: item.quantity + amount } : item)
+        .filter(item => item.quantity > 0);
+
+    saveCartItems(cartItems);
+}
+
+function removeFromCart(productId) {
+    saveCartItems(getCartItems().filter(item => item._id !== productId));
+}
+
+function clearCart() {
+    localStorage.removeItem(cartStorageKey);
+    renderCart();
+}
+
+async function finishCartOrder() {
+    const cartItems = getCartItems();
+    const messageEl = document.getElementById("cartMessage");
+    const checkoutBtn = document.getElementById("checkoutBtn");
+    const name = document.getElementById("customerName").value;
+    const email = document.getElementById("customerEmail").value;
+    const address = document.getElementById("customerAddress").value;
+    const phone = document.getElementById("customerPhone").value;
+
+    if (!cartItems.length) {
+        messageEl.innerText = "Кошничката е празна.";
+        return;
+    }
+
+    if(!name || !email || !address || !phone){
+        messageEl.innerText = "Ве молиме пополнете ги сите полиња.";
+        return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        messageEl.innerText = "Внесете валидна е-маил адреса.";
+        return;
+    }
+
+    try {
+        checkoutBtn.disabled = true;
+        messageEl.innerText = "Се испраќа нарачката...";
+
+        for (const item of cartItems) {
+            for (let index = 0; index < item.quantity; index++) {
+                const response = await fetch("/api/products/orders", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        productId: item._id,
+                        productName: item.name,
+                        customerName: name,
+                        customerEmail: email,
+                        customerAddress: address,
+                        customerPhone: phone
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || "Error sending the order.");
+                }
+            }
+        }
+
+        localStorage.removeItem(cartStorageKey);
+        document.getElementById("customerName").value = "";
+        document.getElementById("customerEmail").value = "";
+        document.getElementById("customerAddress").value = "";
+        document.getElementById("customerPhone").value = "";
+        messageEl.innerText = "Нарачката е испратена успешно!";
+        renderCart();
+    } catch (error) {
+        console.error("Error:", error);
+        messageEl.innerText = error.message;
+        checkoutBtn.disabled = false;
+    }
+}
+
+window.onload = renderCart;
+</script>
+
+</body>
+</html>

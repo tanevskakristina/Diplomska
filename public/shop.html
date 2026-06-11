@@ -19,6 +19,9 @@
             <button onclick="window.location.href='./index.html'">
                 Почетна
             </button>
+            <button id="cartBtn" onclick="window.location.href='./cart.html'" style="display:none;">
+                Кошничка
+            </button>
             <button id="addProductBtn" onclick="window.location.href='./add-product.html'">
                 Додади производ
             </button>
@@ -92,6 +95,7 @@
 let currentProductId = "";
 let currentProductName = "";
 let allProducts = [];
+const cartStorageKey = "shoppingCart";
 
 async function loadProducts() {
     try {
@@ -125,11 +129,61 @@ function renderProducts(filterCategory = "all") {
             <h3>${product.name}</h3>
             <p class="product-category">Категорија: ${product.category}</p>
             <p class="product-price">${product.price} ден</p>
-            <button onclick="orderProduct('${product._id}')">Нарачај</button>
+            <button class="add-cart-btn" onclick="addToCart('${product._id}')">Додади во кошничка</button>
         `;
 
         container.appendChild(productCard);
     });
+}
+
+
+function getCartItems() {
+    return JSON.parse(localStorage.getItem(cartStorageKey) || "[]");
+}
+
+function saveCartItems(items) {
+    localStorage.setItem(cartStorageKey, JSON.stringify(items));
+    updateCartCount();
+}
+
+function updateCartCount() {
+    const cartBtn = document.getElementById("cartBtn");
+    if (!cartBtn) return;
+
+    const count = getCartItems().reduce((total, item) => total + item.quantity, 0);
+    cartBtn.innerText = count > 0 ? `Кошничка (${count})` : "Кошничка";
+}
+
+function addToCart(productId) {
+    const token = localStorage.getItem("token");
+    const adminToken = localStorage.getItem("adminToken");
+
+    if (!token || adminToken) {
+        alert("Only regular users can add products to the cart.");
+        return;
+    }
+
+    const product = allProducts.find(p => p._id === productId);
+    if (!product) return;
+
+    const cartItems = getCartItems();
+    const existingItem = cartItems.find(item => item._id === productId);
+
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        cartItems.push({
+            _id: product._id,
+            name: product.name,
+            price: product.price,
+            category: product.category,
+            image: product.image,
+            quantity: 1
+        });
+    }
+
+    saveCartItems(cartItems);
+    alert("Производот е додаден во кошничка.");
 }
 
 function orderProduct(productId){
@@ -206,17 +260,23 @@ function updateProductButton() {
     const adminToken = localStorage.getItem("adminToken");
     const addProductBtn = document.getElementById("addProductBtn");
     const adminOrdersBtn = document.getElementById("adminOrdersBtn");
+    const cartBtn = document.getElementById("cartBtn");
 
     if (adminToken) {
         addProductBtn.style.display = "inline-block";
         if (adminOrdersBtn) adminOrdersBtn.style.display = "inline-block";
+        if (cartBtn) cartBtn.style.display = "none";
     } else if (token) {
         addProductBtn.style.display = "none";
         if (adminOrdersBtn) adminOrdersBtn.style.display = "none";
+        if (cartBtn) cartBtn.style.display = "inline-block";
     } else {
         addProductBtn.style.display = "none";
         if (adminOrdersBtn) adminOrdersBtn.style.display = "none";
+        if (cartBtn) cartBtn.style.display = "none";
     }
+
+    updateCartCount();
 }
 
 window.onload = function() {
